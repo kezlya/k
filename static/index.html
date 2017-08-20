@@ -1,0 +1,19 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>The HTML5 Herald</title>
+    <script type="application/javascript">
+        setInterval(function() {
+            var myImageElement = document.getElementById('myImage');
+            myImageElement.src = '../stream.png?rand=' + Math.random();
+        }, 120);
+    </script>
+</head>
+
+<body>
+<img src="../test.png" id="myImage" />
+</body>
+</html>

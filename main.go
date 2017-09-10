@@ -22,7 +22,7 @@ func main() {
 	sq := image.Rectangle{image.Point{0, 0}, image.Point{500, 500}}
 	img = image.NewRGBA(sq)
 	go sartAnimation()
-	go trackMouse()
+	//go trackMouse()
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))

@@ -1,4 +1,4 @@
-# Coding art
+# Coding art aka Kaleidoscope
 
 #### Static page that calls /img.png every n miliseconds
 #### Image is genetared by simle pixel loop.

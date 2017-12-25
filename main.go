@@ -2,21 +2,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/nfnt/resize"
 	"image"
-	"image/png"
+	"image/color"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
-	"image/color"
-	"github.com/nfnt/resize"
-)
-
-
+	"image/jpeg"
+	)
 
 type Layer struct {
 	original *image.RGBA
-	current *image.RGBA
+	current  *image.RGBA
 }
 
 //TODO: not sure about it
@@ -28,13 +26,12 @@ type Animation struct {
 func main() {
 	layer1 := getRandomLayer()
 
-
 	go sartAnimation(layer1)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/stream.png", func(w http.ResponseWriter, r *http.Request) {
-		png.Encode(w, layer1.current)
+	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
+		jpeg.Encode(w, layer1.current,&jpeg.Options{80})
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -43,7 +40,7 @@ func main() {
 }
 
 func getRandomLayer() *Layer {
-	return &Layer{current:randomPixels(500,500)}
+	return &Layer{current: randomPixels(500, 500)}
 }
 
 func trackMouse() {
@@ -54,7 +51,7 @@ func trackMouse() {
 	//}
 }
 
-func randomPixels(x,y int ) *image.RGBA {
+func randomPixels(x, y int) *image.RGBA {
 	sq := image.Rectangle{image.Point{0, 0}, image.Point{x, y}}
 	var img *image.RGBA
 	img = image.NewRGBA(sq)
@@ -96,8 +93,7 @@ func sartAnimation(layer *Layer) {
 			fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
 		}*/
 
-		scaleDown(layer,77, true)
-
+		scaleDown(layer, 77, true)
 
 		t := time.Now()
 		fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
@@ -126,17 +122,16 @@ func frameNumber(n int) int {
 }
 
 // Voided function to run whenewer they finish
-func scaleDown(layer *Layer, rate time.Duration, loop bool) {
 
-	if loop{
+func scaleDown(layer *Layer, rate time.Duration, loop bool) {
+	if loop {
 		layer.original = layer.current
 	}
-
 	for {
 		time.Sleep(rate * time.Millisecond)
 		size := layer.current.Rect.Size()
 		if size.X > 1 && size.Y > 1 {
-			bb := resize.Thumbnail(uint(size.X-10), uint(size.Y-10), layer.current, resize.Bicubic)
+			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), layer.current, resize.Bicubic)
 			layer.current = bb.(*image.RGBA)
 			time.Sleep(rate * time.Millisecond)
 
@@ -144,9 +139,9 @@ func scaleDown(layer *Layer, rate time.Duration, loop bool) {
 			break
 		}
 	}
-	if loop{
+	if loop {
 		layer.current = layer.original
-		scaleDown(layer,rate,loop)
+		scaleDown(layer, rate, loop)
 	}
 }
 

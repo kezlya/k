@@ -10,8 +10,11 @@ import (
 	"net/http"
 	"time"
 	"image/jpeg"
+	_ "image/jpeg"
 	"github.com/PuerkitoBio/goquery"
 	//"golang.org/x/net/html"
+	"strconv"
+	"image/draw"
 )
 
 type Layer struct {
@@ -26,14 +29,19 @@ type Animation struct {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+	guess := rand.Intn(100)
 	//layer1 := getRandomLayer()
-	gi := loadGoogleImage("Number+3")
-	//go sartAnimation(layer1)
+
+	gi := loadGoogleImage("Number+"+strconv.Itoa(guess))
+	layer2 := layerFromImage(gi)
+
+	go sartAnimation(layer2)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		jpeg.Encode(w, gi,&jpeg.Options{80})
+		jpeg.Encode(w, layer2.current,&jpeg.Options{80})
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -43,14 +51,6 @@ func main() {
 
 func getRandomLayer() *Layer {
 	return &Layer{current: randomPixels(500, 500)}
-}
-
-func trackMouse() {
-	//for {
-	//	hh := mouse.Event{}
-	//	fmt.Println("pos:", hh.X, hh.Y)
-	//	time.Sleep(50 * time.Microsecond)
-	//}
 }
 
 func randomPixels(x, y int) *image.RGBA {
@@ -71,20 +71,20 @@ func randomPixels(x, y int) *image.RGBA {
 	return img
 }
 
-//func pullGoogleImage() *image.RGBA{
-	//*[@id="mmComponent_images_1"]/ul[1]/li[3]
-//}
-
+func layerFromImage(img image.Image) *Layer {
+	return &Layer{current: convertYCbCr_RGBA(img.(*image.YCbCr))}
+}
 func loadGoogleImage(keyword string) image.Image {
 
-	req := image.Rect(0,0,10,10)
+	var img image.Image
+
 	doc, err := goquery.NewDocument("https://www.google.com/search?q="+keyword+"&tbm=isch")
 	if err != nil {
 		fmt.Printf(err.Error())
 		log.Fatal(err)
 	}
 
-	// slow on purpuse it influence analog like
+	// slow on purpose it influence analog like
 	// try 3 times
 
 	for i := 1; i <= 3; i++ {
@@ -97,23 +97,31 @@ func loadGoogleImage(keyword string) image.Image {
 					if src,e := item2.Attr("src"); e == true {
 						i = 1000
 						fmt.Println("load: ",src)
-						res, err := http.Get(src)
-						if err != nil || res.StatusCode != 200 {
-							// handle errors
-						}
-						defer res.Body.Close()
-						m, _, er := image.Decode(res.Body)
-						if er != nil {
-							fmt.Printf("",m)
-							req = m.Bounds()
-						}
+						img = loadJpegFromUrl(src)
 					}
 				}
 			})
 		})
 	}
 	//mm := image.Image() image.NewRGBA(req)
-	return req
+	return img
+}
+
+func convertYCbCr_RGBA(img *image.YCbCr ) *image.RGBA {
+	b := img.Bounds()
+	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(m, m.Bounds(), img, b.Min, draw.Src)
+	return m
+}
+
+func loadJpegFromUrl(url string) image.Image {
+	res, err := http.Get(url)
+	if err != nil || res.StatusCode != 200 {
+		// handle errors
+	}
+	defer res.Body.Close()
+	m, _, _ := image.Decode(res.Body)
+	return m
 }
 
 func sartAnimation(layer *Layer) {

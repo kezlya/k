@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"time"
 	"image/jpeg"
-	)
+	"github.com/PuerkitoBio/goquery"
+	//"golang.org/x/net/html"
+)
 
 type Layer struct {
 	original *image.RGBA
@@ -24,14 +26,14 @@ type Animation struct {
 }
 
 func main() {
-	layer1 := getRandomLayer()
-
-	go sartAnimation(layer1)
+	//layer1 := getRandomLayer()
+	gi := loadGoogleImage("Number+3")
+	//go sartAnimation(layer1)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		jpeg.Encode(w, layer1.current,&jpeg.Options{80})
+		jpeg.Encode(w, gi,&jpeg.Options{80})
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -67,6 +69,51 @@ func randomPixels(x, y int) *image.RGBA {
 		}
 	}
 	return img
+}
+
+//func pullGoogleImage() *image.RGBA{
+	//*[@id="mmComponent_images_1"]/ul[1]/li[3]
+//}
+
+func loadGoogleImage(keyword string) image.Image {
+
+	req := image.Rect(0,0,10,10)
+	doc, err := goquery.NewDocument("https://www.google.com/search?q="+keyword+"&tbm=isch")
+	if err != nil {
+		fmt.Printf(err.Error())
+		log.Fatal(err)
+	}
+
+	// slow on purpuse it influence analog like
+	// try 3 times
+
+	for i := 1; i <= 3; i++ {
+		rand.Seed(time.Now().UnixNano())
+		guess := rand.Intn(20)
+		fmt.Println(guess)
+		doc.Find(".images_table").Each(func(index int, item *goquery.Selection) {
+			item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
+				if index2 == guess {
+					if src,e := item2.Attr("src"); e == true {
+						i = 1000
+						fmt.Println("load: ",src)
+						res, err := http.Get(src)
+						if err != nil || res.StatusCode != 200 {
+							// handle errors
+						}
+						defer res.Body.Close()
+						m, _, er := image.Decode(res.Body)
+						if er != nil {
+							fmt.Printf("",m)
+							req = m.Bounds()
+						}
+					}
+				}
+			})
+		})
+	}
+	//mm := image.Image() image.NewRGBA(req)
+	return req
 }
 
 func sartAnimation(layer *Layer) {

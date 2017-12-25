@@ -12,28 +12,38 @@ import (
 	"github.com/nfnt/resize"
 )
 
-var img *image.RGBA
 
+
+type Layer struct {
+	original *image.RGBA
+	current *image.RGBA
+}
+
+//TODO: not sure about it
 type Animation struct {
 	Length int
 	Img    *image.RGBA
 }
 
 func main() {
-	sq := image.Rectangle{image.Point{0, 0}, image.Point{500, 500}}
-	img = image.NewRGBA(sq)
+	layer1 := getRandomLayer()
 
-	go sartAnimation()
+
+	go sartAnimation(layer1)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.png", func(w http.ResponseWriter, r *http.Request) {
-		png.Encode(w, img)
+		png.Encode(w, layer1.current)
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+}
+
+func getRandomLayer() *Layer {
+	return &Layer{current:randomPixels(500,500)}
 }
 
 func trackMouse() {
@@ -44,28 +54,27 @@ func trackMouse() {
 	//}
 }
 
-func randomPixels() {
-	for i := 0; i < 255; i++ {
+func randomPixels(x,y int ) *image.RGBA {
+	sq := image.Rectangle{image.Point{0, 0}, image.Point{x, y}}
+	var img *image.RGBA
+	img = image.NewRGBA(sq)
 
-			for x := 0; x < 500; x++ {
-				for y := 0; y < 500; y++ {
-					r := uint8(x - y - i/2)
-					g := uint8(y + x/2 + i)
-					b := uint8(rand.Intn(255))
-					a := uint8(i)
-					c := color.RGBA{r, g, b, a}
-					img.Set(x, y, c)
-				}
-				time.Sleep(50 * time.Nanosecond)
-			}
-			t := time.Now()
-			fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
+	for x := 0; x < 500; x++ {
+		for y := 0; y < 500; y++ {
+			r := uint8(x)
+			g := uint8(y)
+			b := uint8(rand.Intn(255))
+			a := uint8(rand.Intn(255))
+			c := color.RGBA{r, g, b, a}
+			img.Set(x, y, c)
 		}
+	}
+	return img
 }
 
-func sartAnimation() {
+func sartAnimation(layer *Layer) {
 	//animate forever
-	randomPixels()
+
 	for {
 		// start adding effects
 
@@ -87,11 +96,10 @@ func sartAnimation() {
 			fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
 		}*/
 
+		scaleDown(layer,77, true)
 
-		img = scaleDown(5)
-		time.Sleep(50 * time.Nanosecond)
 
-	t := time.Now()
+		t := time.Now()
 		fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
 	}
 }
@@ -117,11 +125,29 @@ func frameNumber(n int) int {
 	return n + 1
 }
 
-
 // Voided function to run whenewer they finish
-func scaleDown(times int) *image.RGBA {
-	bb := resize.Thumbnail(uint(100),uint(100),img,resize.Bicubic)
-	return bb.(*image.RGBA)
+func scaleDown(layer *Layer, rate time.Duration, loop bool) {
+
+	if loop{
+		layer.original = layer.current
+	}
+
+	for {
+		time.Sleep(rate * time.Millisecond)
+		size := layer.current.Rect.Size()
+		if size.X > 1 && size.Y > 1 {
+			bb := resize.Thumbnail(uint(size.X-10), uint(size.Y-10), layer.current, resize.Bicubic)
+			layer.current = bb.(*image.RGBA)
+			time.Sleep(rate * time.Millisecond)
+
+		} else {
+			break
+		}
+	}
+	if loop{
+		layer.current = layer.original
+		scaleDown(layer,rate,loop)
+	}
 }
 
 func scaleUp(speed, times int) {

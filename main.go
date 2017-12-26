@@ -89,15 +89,16 @@ func loadGoogleImage(keyword string) image.Image {
 
 	for i := 1; i <= 3; i++ {
 		rand.Seed(time.Now().UnixNano())
-		guess := rand.Intn(20)
+		guess := rand.Intn(10)
 		fmt.Println(guess)
 		doc.Find(".images_table").Each(func(index int, item *goquery.Selection) {
 			item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
 				if index2 == guess {
 					if src,e := item2.Attr("src"); e == true {
-						i = 1000
-						fmt.Println("load: ",src)
 						img = loadJpegFromUrl(src)
+						if img != nil{
+							i = 1000
+						}
 					}
 				}
 			})
@@ -115,6 +116,7 @@ func convertYCbCr_RGBA(img *image.YCbCr ) *image.RGBA {
 }
 
 func loadJpegFromUrl(url string) image.Image {
+	fmt.Println("load: ",url)
 	res, err := http.Get(url)
 	if err != nil || res.StatusCode != 200 {
 		// handle errors

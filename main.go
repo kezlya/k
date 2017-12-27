@@ -13,6 +13,7 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+	"strconv"
 )
 
 type Layer struct {
@@ -61,9 +62,10 @@ func (s *Screen) Display() *image.RGBA {
 		sp2 := image.Point{s.layers[0].Bounds().Dx(), 0}
 		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].Bounds().Size())}
 		r := image.Rectangle{image.Point{0, 0}, r2.Max}
+
 		rgba := image.NewRGBA(r)
-		draw.Draw(rgba, s.layers[1].Bounds(), s.layers[1], image.Point{0, 0}, draw.Src)
-		draw.Draw(rgba, r2, s.layers[2], image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, s.layers[0].Bounds(), s.layers[0], image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, r2, s.layers[1], image.Point{0, 0}, draw.Src)
 
 		return rgba
 	} else {
@@ -75,18 +77,19 @@ func (s *Screen) Display() *image.RGBA {
 func main() {
 	screen := Screen{}
 
-	rand.Seed(time.Now().UnixNano())
-	//guess := rand.Intn(100)
+
 
 	layer1 := getRandomLayer(100, 100)
 	screen.Add(layer1.current)
 
-	//layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
-	//go sartAnimation(layer2)
-	//screen.AddLayer(layer2.current)
+	rand.Seed(time.Now().UnixNano())
+	guess := rand.Intn(100)
+	layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
+	go sartAnimation(layer2)
+	screen.Add(layer2.current)
 
-	layer3 := getRandomLayer(300, 300)
-	screen.Add(layer3.current)
+	//layer3 := getRandomLayer(300, 300)
+	//screen.Add(layer3.current)
 
 	fmt.Printf("", screen.layers)
 

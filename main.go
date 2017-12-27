@@ -26,14 +26,21 @@ type Screen struct {
 }
 
 func (s Screen) AddLayer(l *Layer) {
+	fmt.Println("adding layer to the screen")
+
 	//TODO: implement queue
 	if s.layers[0] == nil {
+		fmt.Println("1")
 		s.layers[0] = l
 		return
 	} else if s.layers[1] == nil {
+		fmt.Println("2")
+
 		s.layers[1] = s.layers[0]
 		s.layers[0] = l
 	} else {
+		fmt.Println("3")
+
 		s.layers[2] = s.layers[1]
 		s.layers[1] = s.layers[0]
 		s.layers[0] = l
@@ -41,6 +48,8 @@ func (s Screen) AddLayer(l *Layer) {
 }
 
 func (s Screen) RemoveLayer(l *Layer) {
+	fmt.Println("adding layer to the screen")
+
 	for i, _l := range s.layers {
 		if _l == l {
 			s.layers[i] = nil
@@ -50,12 +59,27 @@ func (s Screen) RemoveLayer(l *Layer) {
 }
 
 func (s Screen) Display() *image.RGBA {
-	//TODO: merge layers and return result. Temporary returning random pixel
-	return randomPixels(50, 50)
+	//TODO: merge layers and return result. For now merging only two layers.
+
+	if s.layers[0] != nil && s.layers[1] != nil {
+
+		//TODO: test performance and refactor
+		sp2 := image.Point{s.layers[0].current.Bounds().Dx(), 0}
+		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].current.Bounds().Size())}
+		r := image.Rectangle{image.Point{0, 0}, r2.Max}
+		rgba := image.NewRGBA(r)
+		draw.Draw(rgba, s.layers[1].current.Bounds(), s.layers[1].current, image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, r2, s.layers[2].current, image.Point{0, 0}, draw.Src)
+
+		return rgba
+	} else {
+		return randomPixels(100, 100)
+
+	}
 }
 
 func main() {
-	screen := Screen{}
+	screen := Screen{[3]*Layer{nil,nil,nil}}
 
 	rand.Seed(time.Now().UnixNano())
 	guess := rand.Intn(100)
@@ -66,6 +90,8 @@ func main() {
 	layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
 	go sartAnimation(layer2)
 	screen.AddLayer(layer2)
+
+	fmt.Printf("", screen)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))

@@ -26,16 +26,32 @@ type Screen struct {
 }
 
 func (s Screen) AddLayer(l *Layer) {
-	//TODO: if the layers are full remove the last one and add a new one
+	//TODO: implement queue
+	if s.layers[0] == nil {
+		s.layers[0] = l
+		return
+	} else if s.layers[1] == nil {
+		s.layers[1] = s.layers[0]
+		s.layers[0] = l
+	} else {
+		s.layers[2] = s.layers[1]
+		s.layers[1] = s.layers[0]
+		s.layers[0] = l
+	}
 }
 
 func (s Screen) RemoveLayer(l *Layer) {
-	//TODO: remove if it in layers reorder. no need to reoder. next add will do that
+	for i, _l := range s.layers {
+		if _l == l {
+			s.layers[i] = nil
+			return
+		}
+	}
 }
 
 func (s Screen) Display() *image.RGBA {
 	//TODO: merge layers and return result. Temporary returning random pixel
-	return randomPixels(50,50)
+	return randomPixels(50, 50)
 }
 
 func main() {
@@ -51,7 +67,6 @@ func main() {
 	go sartAnimation(layer2)
 	screen.AddLayer(layer2)
 
-
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +77,6 @@ func main() {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
-
 
 func getRandomLayer() *Layer {
 	return &Layer{current: randomPixels(500, 500)}
@@ -86,7 +100,7 @@ func randomPixels(x, y int) *image.RGBA {
 	return img
 }
 
-func layerFromImage(keyword string ) *Layer {
+func layerFromImage(keyword string) *Layer {
 	var img image.Image
 
 	doc, err := goquery.NewDocument("https://www.google.com/search?q=" + keyword + "&tbm=isch")

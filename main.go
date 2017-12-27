@@ -2,19 +2,18 @@ package main
 
 import (
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/nfnt/resize"
 	"image"
 	"image/color"
+	"image/draw"
+	"image/jpeg"
+	_ "image/jpeg"
 	"log"
 	"math/rand"
 	"net/http"
-	"time"
-	"image/jpeg"
-	_ "image/jpeg"
-	"github.com/PuerkitoBio/goquery"
-	//"golang.org/x/net/html"
 	"strconv"
-	"image/draw"
+	"time"
 )
 
 type Layer struct {
@@ -22,32 +21,48 @@ type Layer struct {
 	current  *image.RGBA
 }
 
-//TODO: not sure about it
-type Animation struct {
-	Length int
-	Img    *image.RGBA
+type Screen struct {
+	layers [3]*Layer
+}
+
+func (s Screen) AddLayer(l *Layer) {
+	//TODO: if the layers are full remove the last one and add a new one
+}
+
+func (s Screen) RemoveLayer(l *Layer) {
+	//TODO: remove if it in layers reorder. no need to reoder. next add will do that
+}
+
+func (s Screen) Display() *image.RGBA {
+	//TODO: merge layers and return result. Temporary returning random pixel
+	return randomPixels(50,50)
 }
 
 func main() {
+	screen := Screen{}
+
 	rand.Seed(time.Now().UnixNano())
 	guess := rand.Intn(100)
-	//layer1 := getRandomLayer()
 
-	gi := loadGoogleImage("Number+"+strconv.Itoa(guess))
-	layer2 := layerFromImage(gi)
+	layer1 := getRandomLayer()
+	screen.AddLayer(layer1)
 
+	layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
 	go sartAnimation(layer2)
+	screen.AddLayer(layer2)
+
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		jpeg.Encode(w, layer2.current,&jpeg.Options{80})
+		jpeg.Encode(w, screen.Display(), &jpeg.Options{80})
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
+
 
 func getRandomLayer() *Layer {
 	return &Layer{current: randomPixels(500, 500)}
@@ -71,14 +86,10 @@ func randomPixels(x, y int) *image.RGBA {
 	return img
 }
 
-func layerFromImage(img image.Image) *Layer {
-	return &Layer{current: convertYCbCr_RGBA(img.(*image.YCbCr))}
-}
-func loadGoogleImage(keyword string) image.Image {
-
+func layerFromImage(keyword string ) *Layer {
 	var img image.Image
 
-	doc, err := goquery.NewDocument("https://www.google.com/search?q="+keyword+"&tbm=isch")
+	doc, err := goquery.NewDocument("https://www.google.com/search?q=" + keyword + "&tbm=isch")
 	if err != nil {
 		fmt.Printf(err.Error())
 		log.Fatal(err)
@@ -94,9 +105,9 @@ func loadGoogleImage(keyword string) image.Image {
 		doc.Find(".images_table").Each(func(index int, item *goquery.Selection) {
 			item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
 				if index2 == guess {
-					if src,e := item2.Attr("src"); e == true {
+					if src, e := item2.Attr("src"); e == true {
 						img = loadJpegFromUrl(src)
-						if img != nil{
+						if img != nil {
 							i = 1000
 						}
 					}
@@ -104,11 +115,11 @@ func loadGoogleImage(keyword string) image.Image {
 			})
 		})
 	}
-	//mm := image.Image() image.NewRGBA(req)
-	return img
+
+	return &Layer{current: convertYCbCr_RGBA(img.(*image.YCbCr))}
 }
 
-func convertYCbCr_RGBA(img *image.YCbCr ) *image.RGBA {
+func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
 	b := img.Bounds()
 	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(m, m.Bounds(), img, b.Min, draw.Src)
@@ -116,7 +127,7 @@ func convertYCbCr_RGBA(img *image.YCbCr ) *image.RGBA {
 }
 
 func loadJpegFromUrl(url string) image.Image {
-	fmt.Println("load: ",url)
+	fmt.Println("load: ", url)
 	res, err := http.Get(url)
 	if err != nil || res.StatusCode != 200 {
 		// handle errors

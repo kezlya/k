@@ -12,7 +12,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -22,54 +21,49 @@ type Layer struct {
 }
 
 type Screen struct {
-	layers [3]*Layer
+	layers [3]*image.RGBA
 }
 
-func (s Screen) AddLayer(l *Layer) {
+func (s *Screen) Add(rgba *image.RGBA) {
 	fmt.Println("adding layer to the screen")
 
-	//TODO: implement queue
+	//TODO: implement queue or play with recursive
 	if s.layers[0] == nil {
-		fmt.Println("1")
-		s.layers[0] = l
+		s.layers[0] = rgba
 		return
 	} else if s.layers[1] == nil {
-		fmt.Println("2")
-
 		s.layers[1] = s.layers[0]
-		s.layers[0] = l
+		s.layers[0] = rgba
 	} else {
-		fmt.Println("3")
-
 		s.layers[2] = s.layers[1]
 		s.layers[1] = s.layers[0]
-		s.layers[0] = l
+		s.layers[0] = rgba
 	}
 }
 
-func (s Screen) RemoveLayer(l *Layer) {
+func (s *Screen) Remove(rgba *image.RGBA) {
 	fmt.Println("adding layer to the screen")
 
 	for i, _l := range s.layers {
-		if _l == l {
+		if _l == rgba {
 			s.layers[i] = nil
 			return
 		}
 	}
 }
 
-func (s Screen) Display() *image.RGBA {
+func (s *Screen) Display() *image.RGBA {
 	//TODO: merge layers and return result. For now merging only two layers.
 
 	if s.layers[0] != nil && s.layers[1] != nil {
 
 		//TODO: test performance and refactor
-		sp2 := image.Point{s.layers[0].current.Bounds().Dx(), 0}
-		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].current.Bounds().Size())}
+		sp2 := image.Point{s.layers[0].Bounds().Dx(), 0}
+		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].Bounds().Size())}
 		r := image.Rectangle{image.Point{0, 0}, r2.Max}
 		rgba := image.NewRGBA(r)
-		draw.Draw(rgba, s.layers[1].current.Bounds(), s.layers[1].current, image.Point{0, 0}, draw.Src)
-		draw.Draw(rgba, r2, s.layers[2].current, image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, s.layers[1].Bounds(), s.layers[1], image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, r2, s.layers[2], image.Point{0, 0}, draw.Src)
 
 		return rgba
 	} else {
@@ -79,19 +73,22 @@ func (s Screen) Display() *image.RGBA {
 }
 
 func main() {
-	screen := Screen{[3]*Layer{nil,nil,nil}}
+	screen := Screen{}
 
 	rand.Seed(time.Now().UnixNano())
-	guess := rand.Intn(100)
+	//guess := rand.Intn(100)
 
-	layer1 := getRandomLayer()
-	screen.AddLayer(layer1)
+	layer1 := getRandomLayer(100, 100)
+	screen.Add(layer1.current)
 
-	layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
-	go sartAnimation(layer2)
-	screen.AddLayer(layer2)
+	//layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
+	//go sartAnimation(layer2)
+	//screen.AddLayer(layer2.current)
 
-	fmt.Printf("", screen)
+	layer3 := getRandomLayer(300, 300)
+	screen.Add(layer3.current)
+
+	fmt.Printf("", screen.layers)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -104,8 +101,8 @@ func main() {
 	}
 }
 
-func getRandomLayer() *Layer {
-	return &Layer{current: randomPixels(500, 500)}
+func getRandomLayer(width, height int) *Layer {
+	return &Layer{current: randomPixels(width, height)}
 }
 
 func randomPixels(x, y int) *image.RGBA {

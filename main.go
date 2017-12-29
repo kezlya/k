@@ -17,6 +17,7 @@ import (
 )
 
 type Layer struct {
+	isLive   bool
 	original *image.RGBA
 	current  *image.RGBA
 }
@@ -25,32 +26,79 @@ type Screen struct {
 	layers [3]*Layer
 }
 
-func (s Screen) AddLayer(l *Layer) {
-	//TODO: if the layers are full remove the last one and add a new one
+func (s *Screen) Init() {
+
 }
 
-func (s Screen) RemoveLayer(l *Layer) {
-	//TODO: remove if it in layers reorder. no need to reoder. next add will do that
+func (s *Screen) Add(l *Layer) {
+	fmt.Println("adding layer to the screen")
+
+	//TODO: implement queue or play with recursive
+	if s.layers[0] == nil {
+		s.layers[0] = l
+		return
+	} else if s.layers[1] == nil {
+		s.layers[1] = s.layers[0]
+		s.layers[0] = l
+	} else {
+		s.layers[2] = s.layers[1]
+		s.layers[1] = s.layers[0]
+		s.layers[0] = l
+	}
 }
 
-func (s Screen) Display() *image.RGBA {
-	//TODO: merge layers and return result. Temporary returning random pixel
-	return randomPixels(50,50)
+func (s *Screen) Remove(l *Layer) {
+	fmt.Println("Removing layer from the screen")
+
+	for i, _l := range s.layers {
+		if _l == l {
+			s.layers[i] = nil
+			return
+		}
+	}
+}
+
+func (s *Screen) Display() *image.RGBA {
+	//TODO: merge layers and return result. For now merging only two layers.
+
+	if s.layers[0].current != nil && s.layers[1].current != nil {
+
+		//TODO: test performance and refactor
+		sp2 := image.Point{s.layers[0].current.Bounds().Dx(), 0}
+		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].current.Bounds().Size())}
+		r := image.Rectangle{image.Point{0, 0}, r2.Max}
+
+		rgba := image.NewRGBA(r)
+		draw.Draw(rgba, s.layers[0].current.Bounds(), s.layers[0].current, image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, r2, s.layers[1].current, image.Point{0, 0}, draw.Src)
+
+		return rgba
+	} else {
+		return randomPixels(100, 100)
+
+	}
 }
 
 func main() {
+	//var a, b, c Layer
 	screen := Screen{}
+	//screen.layers[0] = &a
+	//screen.layers[1] = &b
+	//screen.layers[2] = &c
+
+	layer1 := getRandomLayer(100, 100)
+	screen.Add(layer1)
 
 	rand.Seed(time.Now().UnixNano())
 	guess := rand.Intn(100)
-
-	layer1 := getRandomLayer()
-	screen.AddLayer(layer1)
-
 	layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
-	go sartAnimation(layer2)
-	screen.AddLayer(layer2)
+	go scaleDown(layer2, 77, true)
+	screen.Add(layer2)
 
+	//layer3 := getRandomLayer(300, 300)
+	//screen.Add(layer3.current)
+
+	fmt.Printf("", screen.layers)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -63,9 +111,8 @@ func main() {
 	}
 }
 
-
-func getRandomLayer() *Layer {
-	return &Layer{current: randomPixels(500, 500)}
+func getRandomLayer(width, height int) *Layer {
+	return &Layer{current: randomPixels(width, height)}
 }
 
 func randomPixels(x, y int) *image.RGBA {
@@ -86,7 +133,7 @@ func randomPixels(x, y int) *image.RGBA {
 	return img
 }
 
-func layerFromImage(keyword string ) *Layer {
+func layerFromImage(keyword string) *Layer {
 	var img image.Image
 
 	doc, err := goquery.NewDocument("https://www.google.com/search?q=" + keyword + "&tbm=isch")
@@ -137,37 +184,6 @@ func loadJpegFromUrl(url string) image.Image {
 	return m
 }
 
-func sartAnimation(layer *Layer) {
-	//animate forever
-
-	for {
-		// start adding effects
-
-		//TODO: Convert this colorshifting to functions
-		/*for i := 0; i < 255; i++ {
-
-			for x := 0; x < 500; x++ {
-				for y := 0; y < 500; y++ {
-					r := uint8(x - y - i/2)
-					g := uint8(y + x/2 + i)
-					b := uint8(rand.Intn(255))
-					a := uint8(i)
-					c := color.RGBA{r, g, b, a}
-					img.Set(x, y, c)
-				}
-				time.Sleep(50 * time.Nanosecond)
-			}
-			t := time.Now()
-			fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
-		}*/
-
-		scaleDown(layer, 77, true)
-
-		t := time.Now()
-		fmt.Println(t.Second(), t.Nanosecond()) // prints 1000
-	}
-}
-
 func mirror(n int) int {
 	if n > 127 {
 		return n - 127
@@ -192,17 +208,20 @@ func frameNumber(n int) int {
 // Voided function to run whenewer they finish
 
 func scaleDown(layer *Layer, rate time.Duration, loop bool) {
+	fmt.Println("-1")
 	if loop {
 		layer.original = layer.current
 	}
 	for {
+		fmt.Println("-2")
 		time.Sleep(rate * time.Millisecond)
 		size := layer.current.Rect.Size()
 		if size.X > 1 && size.Y > 1 {
+			fmt.Println("-3", size.X, size.Y)
 			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), layer.current, resize.Bicubic)
 			layer.current = bb.(*image.RGBA)
 			time.Sleep(rate * time.Millisecond)
-
+			fmt.Println("-4")
 		} else {
 			break
 		}
@@ -211,6 +230,7 @@ func scaleDown(layer *Layer, rate time.Duration, loop bool) {
 		layer.current = layer.original
 		scaleDown(layer, rate, loop)
 	}
+	fmt.Println("+")
 }
 
 func scaleUp(speed, times int) {

@@ -42,16 +42,16 @@ func (s *Screen) Remove(l *Layer) {
 func (s *Screen) Display() *image.RGBA {
 	//TODO: merge layers and return result. For now merging only two layers.
 
-	if s.layers[0].current != nil && s.layers[1].current != nil {
+	if s.layers[0].Still != nil && s.layers[1].Still != nil {
 
 		//TODO: test performance and refactor
-		sp2 := image.Point{s.layers[0].current.Bounds().Dx(), 0}
-		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].current.Bounds().Size())}
+		sp2 := image.Point{s.layers[0].Still.Bounds().Dx(), 0}
+		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].Still.Bounds().Size())}
 		r := image.Rectangle{image.Point{0, 0}, r2.Max}
 
 		rgba := image.NewRGBA(r)
-		draw.Draw(rgba, s.layers[0].current.Bounds(), s.layers[0].current, image.Point{0, 0}, draw.Src)
-		draw.Draw(rgba, r2, s.layers[1].current, image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, s.layers[0].Still.Bounds(), s.layers[0].Still, image.Point{0, 0}, draw.Src)
+		draw.Draw(rgba, r2, s.layers[1].Still, image.Point{0, 0}, draw.Src)
 
 		return rgba
 	} else {

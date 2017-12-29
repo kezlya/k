@@ -2,33 +2,28 @@ package main
 
 import (
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/kezlya/k"
-	"image"
-	"image/color"
-	"image/draw"
 	"image/jpeg"
-	_ "image/jpeg"
 	"log"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
-	"github.com/nfnt/resize"
 )
 
 func main() {
 	screen := k.Screen{}
 
-	layer1 := getRandomLayer(100, 100)
-	//go scaleDown(layer1, 150, true)
+	layer1 := k.RandomPixels(100,100)
+	go layer1.ScaleDown(150, true)
 	screen.Add(layer1)
 
+	fmt.Println(layer1)
+
 	rand.Seed(time.Now().UnixNano())
-	guess := rand.Intn(100)
-	layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
+	//guess := rand.Intn(100)
+	//layer2 := layerFromImage("Number+" + strconv.Itoa(guess))
 	//go scaleDown(layer2, 77, true)
-	screen.Add(layer2)
+	//screen.Add(layer2)
 
 	//layer3 := getRandomLayer(300, 300)
 	//screen.Add(layer3.current)
@@ -43,4 +38,3 @@ func main() {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
-

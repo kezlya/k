@@ -1,15 +1,12 @@
 package k
 
 import (
-	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"image"
 	"image/color"
-	"log"
 	"math/rand"
-	"time"
-	"net/http"
+	//	_ "image/jpeg"
 	"github.com/nfnt/resize"
+	"time"
 )
 
 type Layer struct {
@@ -18,15 +15,12 @@ type Layer struct {
 	Still  *image.RGBA
 }
 
-func getRandomLayer(width, height int) *Layer {
-	return &Layer{false, nil, randomPixels(width, height)}
-}
-
-func randomPixels(x, y int) *image.RGBA {
-	sq := image.Rectangle{image.Point{0, 0}, image.Point{x, y}}
+func RandomPixels(width, height int) *Layer {
+	sq := image.Rectangle{
+		image.Point{0, 0},
+		image.Point{width, height}}
 	var img *image.RGBA
 	img = image.NewRGBA(sq)
-
 	for x := 0; x < 500; x++ {
 		for y := 0; y < 500; y++ {
 			r := uint8(x)
@@ -37,10 +31,11 @@ func randomPixels(x, y int) *image.RGBA {
 			img.Set(x, y, c)
 		}
 	}
-	return img
+	return &Layer{Still: img}
 }
 
-func layerFromImage(keyword string) *k.Layer {
+/*
+func layerFromImage(keyword string) *Layer {
 	var img image.Image
 
 	doc, err := goquery.NewDocument("https://www.google.com/search?q=" + keyword + "&tbm=isch")
@@ -70,7 +65,7 @@ func layerFromImage(keyword string) *k.Layer {
 		})
 	}
 
-	return &k.Layer{false, nil, convertYCbCr_RGBA(img.(*image.YCbCr))}
+	return &Layer{false, nil, convertYCbCr_RGBA(img.(*image.YCbCr))}
 }
 
 func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
@@ -91,37 +86,35 @@ func loadJpegFromUrl(url string) image.Image {
 	return m
 }
 
-
 // Voided function to run whenewer they finish
-
-func scaleDown(layer *k.Layer, rate time.Duration, loop bool) {
-	if loop {
-		layer.original = layer.current
-	}
-	for {
-		time.Sleep(rate * time.Millisecond)
-		size := layer.current.Rect.Size()
-		if size.X > 1 && size.Y > 1 {
-			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), layer.current, resize.Bicubic)
-			layer.current = bb.(*image.RGBA)
-			time.Sleep(rate * time.Millisecond)
-		} else {
-			break
-		}
-	}
-	if loop {
-		layer.current = layer.original
-		scaleDown(layer, rate, loop)
-	}
-}
 
 
 
 func scaleUp(speed, times int) {
 
 }
+*/
 
-
+func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
+	if loop {
+		s.backup = s.Still
+	}
+	for {
+		time.Sleep(rate * time.Millisecond)
+		size := s.Still.Rect.Size()
+		if size.X > 1 && size.Y > 1 {
+			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), s.Still, resize.Bicubic)
+			s.Still = bb.(*image.RGBA)
+			time.Sleep(rate * time.Millisecond)
+		} else {
+			break
+		}
+	}
+	if loop {
+		s.Still = s.backup
+		s.ScaleDown(rate, loop)
+	}
+}
 
 func mirror(n int) int {
 	if n > 127 {

@@ -40,7 +40,7 @@ func RandomPixels(width, height int) *Layer {
 }
 
 func GoogleImage(keyword string, order int) *Layer {
-	var img image.Image
+	var img *image.RGBA
 
 	if order < 1 {
 		rand.Seed(time.Now().UnixNano())
@@ -57,17 +57,28 @@ func GoogleImage(keyword string, order int) *Layer {
 		item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
 			if index2 == order {
 				if src, e := item2.Attr("src"); e == true {
-					img = loadJpegFromUrl(src)
-					if img == nil {
-						img = blank()
-					}
+					img = loadFromUrl(src)
 				}
 			}
-
 		})
 	})
 
-	return &Layer{Still: convertYCbCr_RGBA(img.(*image.YCbCr))}
+	if img == nil {
+		img = blank()
+	}
+
+	return &Layer{Still: img}
+}
+
+func OnlineImage(url string) *Layer {
+	var img *image.RGBA
+
+	img = loadFromUrl(url)
+	if img == nil {
+		img = blank()
+	}
+
+	return &Layer{Still: img}
 }
 
 func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
@@ -77,15 +88,27 @@ func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
 	return m
 }
 
-func loadJpegFromUrl(url string) image.Image {
+
+func loadFromUrl(url string) *image.RGBA {
 	fmt.Println("load: ", url)
 	res, err := http.Get(url)
 	if err != nil || res.StatusCode != 200 {
-		// handle errors
+		log.Println(res.StatusCode , " status code from the url ", url)
 	}
 	defer res.Body.Close()
 	m, _, _ := image.Decode(res.Body)
-	return m
+
+	_, ok := m.(*image.YCbCr)
+	if !ok{
+		return convertYCbCr_RGBA(m.(*image.YCbCr))
+	}
+
+	_, ok = m.(*image.RGBA)
+	if !ok{
+		return nil
+	}
+
+	return m.(*image.RGBA)
 }
 
 func scaleUp(speed, times int) {

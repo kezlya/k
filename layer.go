@@ -1,11 +1,16 @@
 package k
 
 import (
+	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/nfnt/resize"
 	"image"
 	"image/color"
+	"image/draw"
+	_ "image/jpeg"
+	"log"
 	"math/rand"
-	//	_ "image/jpeg"
-	"github.com/nfnt/resize"
+	"net/http"
 	"time"
 )
 
@@ -34,9 +39,13 @@ func RandomPixels(width, height int) *Layer {
 	return &Layer{Still: img}
 }
 
-/*
-func layerFromImage(keyword string) *Layer {
+func GoogleImage(keyword string, order int) *Layer {
 	var img image.Image
+
+	if order < 1 {
+		rand.Seed(time.Now().UnixNano())
+		order = rand.Intn(20)
+	}
 
 	doc, err := goquery.NewDocument("https://www.google.com/search?q=" + keyword + "&tbm=isch")
 	if err != nil {
@@ -44,28 +53,21 @@ func layerFromImage(keyword string) *Layer {
 		log.Fatal(err)
 	}
 
-	// slow on purpose it influence analog like
-	// try 3 times
-
-	for i := 1; i <= 3; i++ {
-		rand.Seed(time.Now().UnixNano())
-		guess := rand.Intn(10)
-		fmt.Println(guess)
-		doc.Find(".images_table").Each(func(index int, item *goquery.Selection) {
-			item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
-				if index2 == guess {
-					if src, e := item2.Attr("src"); e == true {
-						img = loadJpegFromUrl(src)
-						if img != nil {
-							i = 1000 //TODO: refactor
-						}
+	doc.Find(".images_table").Each(func(index int, item *goquery.Selection) {
+		item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
+			if index2 == order {
+				if src, e := item2.Attr("src"); e == true {
+					img = loadJpegFromUrl(src)
+					if img == nil {
+						img = blank()
 					}
 				}
-			})
-		})
-	}
+			}
 
-	return &Layer{false, nil, convertYCbCr_RGBA(img.(*image.YCbCr))}
+		})
+	})
+
+	return &Layer{Still: convertYCbCr_RGBA(img.(*image.YCbCr))}
 }
 
 func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
@@ -86,14 +88,9 @@ func loadJpegFromUrl(url string) image.Image {
 	return m
 }
 
-// Voided function to run whenewer they finish
-
-
-
 func scaleUp(speed, times int) {
 
 }
-*/
 
 func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 	if loop {

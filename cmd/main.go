@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/kezlya/k"
 	"image/jpeg"
 	"log"
@@ -14,11 +13,11 @@ import (
 func main() {
 	screen := k.Screen{}
 
-	layer1 := k.RandomPixels(100, 100)
+	//layer1 := k.RandomPixels(100, 100)
 	//go layer1.ScaleDown(150, true)
-	screen.Add(layer1)
+	//screen.Add(layer1)
 
-	fmt.Println(layer1)
+	//fmt.Println(layer1)
 
 	rand.Seed(time.Now().UnixNano())
 	guess := rand.Intn(100)

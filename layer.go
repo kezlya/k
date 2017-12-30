@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"image/draw"
 	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"math/rand"
 	"net/http"
@@ -88,6 +89,12 @@ func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
 	return m
 }
 
+func convertPaletted_RGBA(img *image.Paletted) *image.RGBA {
+	b := img.Bounds()
+	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(m, m.Bounds(), img, b.Min, draw.Src)
+	return m
+}
 
 func loadFromUrl(url string) *image.RGBA {
 	fmt.Println("load: ", url)
@@ -98,17 +105,28 @@ func loadFromUrl(url string) *image.RGBA {
 	defer res.Body.Close()
 	m, _, _ := image.Decode(res.Body)
 
-	_, ok := m.(*image.YCbCr)
-	if !ok{
-		return convertYCbCr_RGBA(m.(*image.YCbCr))
-	}
 
-	_, ok = m.(*image.RGBA)
-	if !ok{
+	switch i := m.(type) {
+	case *image.YCbCr:
+		fmt.Println("it's 1 ",i)
+
+		return convertYCbCr_RGBA(m.(*image.YCbCr))
+	case *image.RGBA:
+		fmt.Println("it's 2 ",i)
+
+		return m.(*image.RGBA)
+	case *image.NRGBA:
+		fmt.Println("it's 3 ",i)
+
+		return nil
+	case *image.Paletted:
+		fmt.Println("it's 3 ",i)
+
+		return convertPaletted_RGBA(m.(*image.Paletted))
+	default:
+		fmt.Println("it's nothing",i)
 		return nil
 	}
-
-	return m.(*image.RGBA)
 }
 
 func scaleUp(speed, times int) {

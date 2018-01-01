@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"image/draw"
 	_ "image/jpeg"
+	_ "image/png"
 	"log"
 	"math/rand"
 	"net/http"
@@ -40,7 +41,7 @@ func RandomPixels(width, height int) *Layer {
 }
 
 func GoogleImage(keyword string, order int) *Layer {
-	var img image.Image
+	var img *image.RGBA
 
 	if order < 1 {
 		rand.Seed(time.Now().UnixNano())
@@ -57,17 +58,28 @@ func GoogleImage(keyword string, order int) *Layer {
 		item.Find("img").Each(func(index2 int, item2 *goquery.Selection) {
 			if index2 == order {
 				if src, e := item2.Attr("src"); e == true {
-					img = loadJpegFromUrl(src)
-					if img == nil {
-						img = blank()
-					}
+					img = loadFromUrl(src)
 				}
 			}
-
 		})
 	})
 
-	return &Layer{Still: convertYCbCr_RGBA(img.(*image.YCbCr))}
+	if img == nil {
+		img = blank()
+	}
+
+	return &Layer{Still: img}
+}
+
+func OnlineImage(url string) *Layer {
+	var img *image.RGBA
+
+	img = loadFromUrl(url)
+	if img == nil {
+		img = blank()
+	}
+
+	return &Layer{Still: img}
 }
 
 func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
@@ -77,15 +89,44 @@ func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
 	return m
 }
 
-func loadJpegFromUrl(url string) image.Image {
+func convertPaletted_RGBA(img *image.Paletted) *image.RGBA {
+	b := img.Bounds()
+	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	draw.Draw(m, m.Bounds(), img, b.Min, draw.Src)
+	return m
+}
+
+func loadFromUrl(url string) *image.RGBA {
 	fmt.Println("load: ", url)
 	res, err := http.Get(url)
 	if err != nil || res.StatusCode != 200 {
-		// handle errors
+		log.Println(res.StatusCode , " status code from the url ", url)
 	}
 	defer res.Body.Close()
 	m, _, _ := image.Decode(res.Body)
-	return m
+
+
+	switch i := m.(type) {
+	case *image.YCbCr:
+		fmt.Println("it's 1 ",i)
+
+		return convertYCbCr_RGBA(m.(*image.YCbCr))
+	case *image.RGBA:
+		fmt.Println("it's 2 ",i)
+
+		return m.(*image.RGBA)
+	case *image.NRGBA:
+		fmt.Println("it's 3 ",i)
+
+		return nil
+	case *image.Paletted:
+		fmt.Println("it's 3 ",i)
+
+		return convertPaletted_RGBA(m.(*image.Paletted))
+	default:
+		fmt.Println("it's nothing",i)
+		return nil
+	}
 }
 
 func scaleUp(speed, times int) {

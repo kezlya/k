@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/draw"
 	"log"
+	"image/color"
 )
 
 type Screen struct {
@@ -39,24 +40,25 @@ func (s *Screen) Remove(l *Layer) {
 }
 
 //TODO: need to add parameters for dimensions
-func (s *Screen) Display() *image.RGBA {
+func (s *Screen) Display(with, hight int) *image.RGBA {
 	//TODO: merge layers and return result. For now merging only two layers.
 
-	if s.layers[0].Still != nil && s.layers[1].Still != nil {
+	rgba := image.NewRGBA(image.Rect(0,0,with,hight))
+	draw.Draw(rgba, rgba.Bounds(), &image.Uniform{color.White}, image.Point{0, 0}, draw.Src)
 
-		//TODO: test performance and refactor
-		sp2 := image.Point{s.layers[0].Still.Bounds().Dx(), 0}
-		r2 := image.Rectangle{sp2, sp2.Add(s.layers[1].Still.Bounds().Size())}
-		r := image.Rectangle{image.Point{0, 0}, r2.Max}
-
-		rgba := image.NewRGBA(r)
-		draw.Draw(rgba, s.layers[0].Still.Bounds(), s.layers[0].Still, image.Point{0, 0}, draw.Src)
-		draw.Draw(rgba, r2, s.layers[1].Still, image.Point{0, 0}, draw.Src)
-
-		return rgba
-	} else {
-		return blank()
+	if s.layers[0]!= nil {
+		draw.Draw(rgba, rgba.Bounds(), s.layers[0].Still, s.layers[0].Still.Bounds().Min, draw.Over)
 	}
+
+	if s.layers[1] != nil {
+		draw.Draw(rgba, rgba.Bounds(), s.layers[1].Still, s.layers[1].Still.Bounds().Min, draw.Over)
+	}
+
+	if s.layers[2] != nil {
+		draw.Draw(rgba, rgba.Bounds(), s.layers[2].Still, s.layers[2].Still.Bounds().Min, draw.Over)
+	}
+
+	return rgba
 }
 
 func blank() *image.RGBA {

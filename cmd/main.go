@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/kezlya/k"
 	"image/jpeg"
 	"log"
@@ -18,7 +17,10 @@ func main() {
 	go layer1.ScaleDown(150, true)
 	screen.Add(layer1)
 
-	fmt.Println(layer1)
+
+	layer3 := k.OnlineImage("http://2fatnerds.com/wp-content/uploads/2013/10/giant-manta-ray.png")
+	go layer3.ScaleDown( 33, true)
+	screen.Add(layer3)
 
 	rand.Seed(time.Now().UnixNano())
 	guess := rand.Intn(100)
@@ -26,13 +28,10 @@ func main() {
 	go layer2.ScaleDown( 77, true)
 	screen.Add(layer2)
 
-	//layer3 := getRandomLayer(300, 300)
-	//screen.Add(layer3.current)
-
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		jpeg.Encode(w, screen.Display(), &jpeg.Options{80})
+		jpeg.Encode(w, screen.Display(500,500), &jpeg.Options{80})
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {

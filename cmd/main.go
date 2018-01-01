@@ -28,8 +28,6 @@ func main() {
 	go layer2.ScaleDown( 77, true)
 	screen.Add(layer2)
 
-
-
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {

@@ -13,7 +13,7 @@ import (
 func main() {
 	screen := k.Screen{}
 
-	layer1 := k.RandomPixels(100, 100)
+	layer1 := k.RandomPixels(500, 500 )
 	go layer1.ScaleDown(150, true)
 	screen.Add(layer1)
 

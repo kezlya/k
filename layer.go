@@ -21,7 +21,11 @@ type Layer struct {
 	Still  *image.RGBA
 }
 
-func RandomPixels(width, height int) *Layer {
+func LayerFrom(img *image.RGBA) *Layer {
+	return &Layer{Still: img}
+}
+
+func RandomPixels(width, height int) *image.RGBA {
 	sq := image.Rectangle{
 		image.Point{0, 0},
 		image.Point{width, height}}
@@ -37,10 +41,10 @@ func RandomPixels(width, height int) *Layer {
 			img.Set(x, y, c)
 		}
 	}
-	return &Layer{Still: img}
+	return img
 }
 
-func GoogleImage(keyword string, order int) *Layer {
+func GoogleImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
 
 	if order < 1 {
@@ -67,19 +71,17 @@ func GoogleImage(keyword string, order int) *Layer {
 	if img == nil {
 		img = blank()
 	}
-
-	return &Layer{Still: img}
+	return img
 }
 
-func OnlineImage(url string) *Layer {
+func OnlineImage(url string) *image.RGBA {
 	var img *image.RGBA
 
 	img = loadFromUrl(url)
 	if img == nil {
 		img = blank()
 	}
-
-	return &Layer{Still: img}
+	return img
 }
 
 func convertYCbCr_RGBA(img *image.YCbCr) *image.RGBA {
@@ -100,31 +102,21 @@ func loadFromUrl(url string) *image.RGBA {
 	fmt.Println("load: ", url)
 	res, err := http.Get(url)
 	if err != nil || res.StatusCode != 200 {
-		log.Println(res.StatusCode , " status code from the url ", url)
+		log.Println(res.StatusCode, " status code from the url ", url)
 	}
 	defer res.Body.Close()
 	m, _, _ := image.Decode(res.Body)
 
-
-	switch i := m.(type) {
+	switch m.(type) {
 	case *image.YCbCr:
-		fmt.Println("it's 1 ",i)
-
 		return convertYCbCr_RGBA(m.(*image.YCbCr))
 	case *image.RGBA:
-		fmt.Println("it's 2 ",i)
-
 		return m.(*image.RGBA)
 	case *image.NRGBA:
-		fmt.Println("it's 3 ",i)
-
 		return nil
 	case *image.Paletted:
-		fmt.Println("it's 3 ",i)
-
 		return convertPaletted_RGBA(m.(*image.Paletted))
 	default:
-		fmt.Println("it's nothing",i)
 		return nil
 	}
 }

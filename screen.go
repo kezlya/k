@@ -2,9 +2,9 @@ package k
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"log"
-	"image/color"
 )
 
 type Screen struct {
@@ -40,13 +40,13 @@ func (s *Screen) Remove(l *Layer) {
 }
 
 //TODO: need to add parameters for dimensions
-func (s *Screen) Display(with, hight int) *image.RGBA {
+func (s *Screen) Display(width, height int) *image.RGBA {
 	//TODO: merge layers and return result. For now merging only two layers.
 
-	rgba := image.NewRGBA(image.Rect(0,0,with,hight))
+	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(rgba, rgba.Bounds(), &image.Uniform{color.White}, image.Point{0, 0}, draw.Src)
 
-	if s.layers[0]!= nil {
+	if s.layers[0] != nil {
 		draw.Draw(rgba, rgba.Bounds(), s.layers[0].Still, s.layers[0].Still.Bounds().Min, draw.Over)
 	}
 

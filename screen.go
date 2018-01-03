@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"log"
+	"github.com/nfnt/resize"
 )
 
 type DisplayGrid int
@@ -19,7 +20,7 @@ const (
 
 type Screen struct {
 	layers [3]*Layer
-	grid   int
+	grid   DisplayGrid
 }
 
 func (s *Screen) Add(l *Layer) {
@@ -66,11 +67,20 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 		draw.Draw(rgba, rgba.Bounds(), s.layers[2].Still, s.layers[2].Still.Bounds().Min, draw.Over)
 	}
 
+	if s.grid == FOUR{
+		sRgba := resize.Thumbnail(uint(width/2), uint(height/2), rgba, resize.Bicubic).(*image.RGBA)
+		rgba = image.NewRGBA(image.Rect(0, 0, width, height))
+		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{0,0}, draw.Over)
+		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{width/2,0}, draw.Over)
+		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{0,height}, draw.Over)
+		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{width/2,height}, draw.Over)
+	}
+
 	return rgba
 }
 
 func (s *Screen) GridTo(size DisplayGrid) {
-
+	s.grid = size
 }
 
 func blank() *image.RGBA {

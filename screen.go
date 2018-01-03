@@ -7,8 +7,19 @@ import (
 	"log"
 )
 
+type DisplayGrid int
+
+const (
+	ONE DisplayGrid = 1 << iota
+	TWO
+	FOUR
+	EIGHT
+	SIXTEEN
+)
+
 type Screen struct {
 	layers [3]*Layer
+	grid   int
 }
 
 func (s *Screen) Add(l *Layer) {
@@ -39,10 +50,7 @@ func (s *Screen) Remove(l *Layer) {
 	}
 }
 
-//TODO: need to add parameters for dimensions
 func (s *Screen) Display(width, height int) *image.RGBA {
-	//TODO: merge layers and return result. For now merging only two layers.
-
 	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(rgba, rgba.Bounds(), &image.Uniform{color.White}, image.Point{0, 0}, draw.Src)
 
@@ -59,6 +67,10 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 	}
 
 	return rgba
+}
+
+func (s *Screen) GridTo(int) {
+
 }
 
 func blank() *image.RGBA {

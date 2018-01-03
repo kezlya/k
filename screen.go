@@ -69,7 +69,7 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 	return rgba
 }
 
-func (s *Screen) GridTo(int) {
+func (s *Screen) GridTo(size DisplayGrid) {
 
 }
 

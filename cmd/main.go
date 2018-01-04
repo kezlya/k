@@ -37,8 +37,8 @@ func startServer(screen *k.Screen) {
 func playGroud(screen *k.Screen) {
 
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
-	layer3 := k.LayerFrom(k.GoogleImage("vitaly",4))
-	//go layer3.ScaleDown(33, true)
+	layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
+	go layer3.ScaleDown(33, true)
 	screen.Add(layer3)
 	screen.GridTo(k.FOUR)
 

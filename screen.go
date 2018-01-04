@@ -74,23 +74,29 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 
 		sw := width/2
 		sh := height/2
+		//rc := image.Rect(0,0,sw,sh)
+		pt1, pt2, pt3, pt4 := image.Pt(0,0), image.Pt(0, -sh), image.Pt(-sw,-sh), image.Pt(-sw,0)
 		sRgba := resize.Thumbnail(uint(sw), uint(sh), rgba, resize.Bicubic).(*image.RGBA)
 
 		fmt.Println(rgba.Bounds())
 
 
-		draw.Draw(gridBG,gridBG.Bounds(),sRgba,image.Point{0,0}, draw.Src)
+		draw.Draw(gridBG,gridBG.Bounds(),sRgba,pt1, draw.Over)
+		draw.Draw(gridBG,gridBG.Bounds(),sRgba,pt2, draw.Over)
+		draw.Draw(gridBG,gridBG.Bounds(),sRgba,pt3, draw.Over)
+		draw.Draw(gridBG,gridBG.Bounds(),sRgba,pt4, draw.Over)
 
 
 
 		b := image.Rect(0, 0, width, height)
+		fmt.Println(image.Pt(0, 0).Sub(sRgba.Bounds().Max))
 		//b.in
 		//p := image.Pt(0, 30)
 		// Note that even though the second argument is b,
 		// the effective rectangle is smaller due to clipping.
-		draw.Draw(rgba, b, rgba, b.Min.Sub(image.Pt(100,50)), draw.Over)
+		draw.Draw(rgba, b, sRgba, image.Pt(0, 0).Sub(sRgba.Bounds().Max), draw.Over)
 		//dirtyRect := b.Intersect(image.Rect(b.Min.X, b.Max.Y-20, b.Max.X, b.Max.Y))
-		return rgba
+		return gridBG
 
 
 

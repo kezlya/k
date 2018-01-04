@@ -15,9 +15,9 @@ const displayWidth, displayHeight, quality = 300, 300, 80
 func main() {
 	screen := k.Screen{}
 
-	//playGroud(&screen)
+	playGroud(&screen)
 
-	go analogNumber(&screen)
+	//go analogNumber(&screen)
 
 	startServer(&screen)
 }

@@ -1,14 +1,26 @@
 package k
 
 import (
+	"github.com/nfnt/resize"
 	"image"
 	"image/color"
 	"image/draw"
 	"log"
 )
 
+type DisplayGrid int
+
+const (
+	ONE DisplayGrid = 1 << iota
+	TWO
+	FOUR
+	EIGHT
+	SIXTEEN
+)
+
 type Screen struct {
 	layers [3]*Layer
+	grid   DisplayGrid
 }
 
 func (s *Screen) Add(l *Layer) {
@@ -39,26 +51,33 @@ func (s *Screen) Remove(l *Layer) {
 	}
 }
 
-//TODO: need to add parameters for dimensions
 func (s *Screen) Display(width, height int) *image.RGBA {
-	//TODO: merge layers and return result. For now merging only two layers.
+	o := image.Point{0, 0}
+	b := image.Rect(0, 0, width, height)
+	d := image.NewRGBA(b)
+	draw.Draw(d, b, &image.Uniform{color.White}, o, draw.Src)
 
-	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
-	draw.Draw(rgba, rgba.Bounds(), &image.Uniform{color.White}, image.Point{0, 0}, draw.Src)
-
-	if s.layers[0] != nil {
-		draw.Draw(rgba, rgba.Bounds(), s.layers[0].Still, s.layers[0].Still.Bounds().Min, draw.Over)
+	for _, l := range s.layers {
+		if l != nil {
+			draw.Draw(d, b, l.Still, o, draw.Over)
+		}
 	}
 
-	if s.layers[1] != nil {
-		draw.Draw(rgba, rgba.Bounds(), s.layers[1].Still, s.layers[1].Still.Bounds().Min, draw.Over)
+	if s.grid == FOUR {
+		w, h := width/2, height/2
+		o2, o3, o4 := image.Pt(0, -h), image.Pt(-w, -h), image.Pt(-w, 0)
+		sd := resize.Thumbnail(uint(w), uint(h), d, resize.Bicubic).(*image.RGBA)
+		draw.Draw(d, b, sd, o, draw.Over)
+		draw.Draw(d, b, sd, o2, draw.Over)
+		draw.Draw(d, b, sd, o3, draw.Over)
+		draw.Draw(d, b, sd, o4, draw.Over)
 	}
 
-	if s.layers[2] != nil {
-		draw.Draw(rgba, rgba.Bounds(), s.layers[2].Still, s.layers[2].Still.Bounds().Min, draw.Over)
-	}
+	return d
+}
 
-	return rgba
+func (s *Screen) GridTo(size DisplayGrid) {
+	s.grid = size
 }
 
 func blank() *image.RGBA {

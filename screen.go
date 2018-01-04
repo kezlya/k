@@ -6,6 +6,7 @@ import (
 	"image/draw"
 	"log"
 	"github.com/nfnt/resize"
+	"fmt"
 )
 
 type DisplayGrid int
@@ -68,12 +69,34 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 	}
 
 	if s.grid == FOUR{
-		sRgba := resize.Thumbnail(uint(width/2), uint(height/2), rgba, resize.Bicubic).(*image.RGBA)
-		rgba = image.NewRGBA(image.Rect(0, 0, width, height))
-		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{0,0}, draw.Over)
-		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{width/2,0}, draw.Over)
-		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{0,height}, draw.Over)
-		draw.Draw(rgba, rgba.Bounds(), sRgba, image.Point{width/2,height}, draw.Over)
+		gridBG := image.NewRGBA(image.Rect(0, 0, width, height))
+//fmt.Println(gridBG.Bounds())
+
+		sw := width/2
+		sh := height/2
+		sRgba := resize.Thumbnail(uint(sw), uint(sh), rgba, resize.Bicubic).(*image.RGBA)
+
+		fmt.Println(rgba.Bounds())
+
+
+		draw.Draw(gridBG,gridBG.Bounds(),sRgba,image.Point{0,0}, draw.Src)
+
+
+
+		b := image.Rect(0, 0, width, height)
+		//b.in
+		//p := image.Pt(0, 30)
+		// Note that even though the second argument is b,
+		// the effective rectangle is smaller due to clipping.
+		draw.Draw(rgba, b, rgba, b.Min.Sub(image.Pt(100,50)), draw.Over)
+		//dirtyRect := b.Intersect(image.Rect(b.Min.X, b.Max.Y-20, b.Max.X, b.Max.Y))
+		return rgba
+
+
+
+
+
+		//return gridBG
 	}
 
 	return rgba

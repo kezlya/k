@@ -36,8 +36,9 @@ func startServer(screen *k.Screen) {
 
 func playGroud(screen *k.Screen) {
 
-	layer3 := k.LayerFrom(k.RandomPixels(300,300))
-	go layer3.ScaleDown(33, true)
+	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
+	layer3 := k.LayerFrom(k.GoogleImage("vitaly",4))
+	//go layer3.ScaleDown(33, true)
 	screen.Add(layer3)
 	screen.GridTo(k.FOUR)
 

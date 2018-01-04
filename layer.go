@@ -1,7 +1,6 @@
 package k
 
 import (
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/nfnt/resize"
 	"image"
@@ -13,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+	"fmt"
 )
 
 type Layer struct {
@@ -99,7 +99,7 @@ func convertPaletted_RGBA(img *image.Paletted) *image.RGBA {
 }
 
 func loadFromUrl(url string) *image.RGBA {
-	fmt.Println("load: ", url)
+	log.Println("load: ", url)
 	res, err := http.Get(url)
 	if err != nil || res.StatusCode != 200 {
 		log.Println(res.StatusCode, " status code from the url ", url)
@@ -132,7 +132,7 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 	for {
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
-		if size.X > 1 && size.Y > 1 {
+		if size.X > 5 && size.Y > 5 {
 			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), s.Still, resize.Bicubic)
 			s.Still = bb.(*image.RGBA)
 		} else {
@@ -140,7 +140,6 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 		}
 	}
 	if loop {
-		fmt.Println("ddd")
 		s.Still = s.backup
 		s.ScaleDown(rate, loop)
 	}

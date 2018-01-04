@@ -135,12 +135,12 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 		if size.X > 1 && size.Y > 1 {
 			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), s.Still, resize.Bicubic)
 			s.Still = bb.(*image.RGBA)
-			time.Sleep(rate * time.Millisecond)
 		} else {
 			break
 		}
 	}
 	if loop {
+		fmt.Println("ddd")
 		s.Still = s.backup
 		s.ScaleDown(rate, loop)
 	}

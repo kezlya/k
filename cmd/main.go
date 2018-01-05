@@ -15,9 +15,9 @@ const displayWidth, displayHeight, quality = 500, 500, 80
 func main() {
 	screen := k.Screen{}
 
-	playGroud(&screen)
+	//playGroud(&screen)
 
-	//go analogNumber(&screen)
+	go analogNumber(&screen)
 
 	startServer(&screen)
 }
@@ -51,7 +51,7 @@ func analogNumber(screen *k.Screen) {
 	l := k.LayerFrom(k.GoogleImage("Number+"+strconv.Itoa(n), -1))
 	screen.Add(l)
 	screen.GridTo(k.FOUR)
-	go l.ScaleDown(77, true)
+	go l.ScaleUp(30, 800,true)
 
 	for {
 		n = rand.Intn(100)

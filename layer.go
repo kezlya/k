@@ -121,8 +121,24 @@ func loadFromUrl(url string) *image.RGBA {
 	}
 }
 
-func scaleUp(speed, times int) {
-
+func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
+	if loop {
+		s.backup = s.Still
+	}
+	for {
+		time.Sleep(rate * time.Millisecond)
+		size := s.Still.Rect.Size()
+		if size.X < maxWith {
+			bb := resize.Resize(uint(size.X+5),0, s.Still, resize.Bicubic)
+			s.Still = bb.(*image.RGBA)
+		} else {
+			break
+		}
+	}
+	if loop {
+		s.Still = s.backup
+		s.ScaleUp(rate, maxWith, loop)
+	}
 }
 
 func (s *Layer) ScaleDown(rate time.Duration, loop bool) {

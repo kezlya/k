@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const displayWidth, displayHeight, quality = 300, 300, 80
+const displayWidth, displayHeight, quality = 500, 500, 80
 
 func main() {
 	screen := k.Screen{}
@@ -38,7 +38,7 @@ func playGroud(screen *k.Screen) {
 
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	go layer3.ScaleDown(33, true)
+	go layer3.ScaleUp(33, 1000,true)
 	screen.Add(layer3)
 	screen.GridTo(k.FOUR)
 

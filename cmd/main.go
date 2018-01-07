@@ -50,12 +50,12 @@ func analogNumber(screen *k.Screen) {
 	n := rand.Intn(100)
 	l := k.LayerFrom(k.GoogleImage("Number+"+strconv.Itoa(n), -1))
 	screen.Add(l)
-	screen.GridTo(k.FOUR)
+	screen.GridTo(k.EIGHT)
 	go l.ScaleUp(30, 800,true)
 
 	for {
 		n = rand.Intn(100)
 		l.Still = k.GoogleImage("Number+"+strconv.Itoa(n), -1)
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(2000 * time.Millisecond)
 	}
 }

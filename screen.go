@@ -71,6 +71,14 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 		draw.Draw(d, b, sd, o2, draw.Over)
 		draw.Draw(d, b, sd, o3, draw.Over)
 		draw.Draw(d, b, sd, o4, draw.Over)
+	} else if s.grid==EIGHT{
+		w, h := width/4, height/4
+		for i:=0;i<4;i++ {
+			for j:=0;j<4;j++ {
+				sd := resize.Thumbnail(uint(w), uint(h), d, resize.Bicubic).(*image.RGBA)
+				draw.Draw(d, b, sd, image.Pt(-w*i, -h*j), draw.Over)
+			}
+		}
 	}
 
 	return d

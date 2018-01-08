@@ -2,33 +2,13 @@ package k
 
 import (
 	"bytes"
-	"os/exec"
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"os/exec"
 	"strings"
 )
-
-var witKey string
-
-/** SetWitKey
-*   witKey must be set prior to executing any wit commands
-**/
-func SetWitKey(key string) string {
-	witKey = key
-	return witKey
-}
-
-/** PrintWitKey
-*   Returns the current wit key if set, otherwise returns nil
-**/
-func PrintWitKey() string {
-	return witKey
-}
-
-/** convert
-* converts a message with spaces into one suitable to passing to wit
-**/
 
 func convert(message string) string {
 	arrString := strings.Split(message, " ")
@@ -42,7 +22,7 @@ func convert(message string) string {
 func SendWitMessage(message string) string {
 	url := "https://api.wit.ai/message?v=20160225&q=" + convert(message)
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer "+witKey)
+	req.Header.Set("Authorization", "Bearer ")
 	client := &http.Client{}
 	resp, _ := client.Do(req)
 	contents, _ := ioutil.ReadAll(resp.Body)
@@ -54,7 +34,7 @@ func SendWitMessage(message string) string {
 *@param filename the full path to the file that is to be sent
 *@return a string with the json data received
 **/
-func SendWitVoice(fileRef string) string {
+func SendWitVoice(fileRef, key string) string {
 	audio, err := ioutil.ReadFile(fileRef)
 	if err != nil {
 		log.Fatal("Error reading file:\n%v\n", err)
@@ -70,7 +50,7 @@ func SendWitVoice(fileRef string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Set("Authorization", "Bearer "+witKey)
+	req.Header.Set("Authorization", "Bearer "+key)
 	req.Header.Set("Content-Type", "audio/wav")
 	res, err := client.Do(req)
 	if err != nil {
@@ -90,7 +70,7 @@ func SendWitBuff(buffer *bytes.Buffer) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Set("Authorization", "Bearer "+witKey)
+	req.Header.Set("Authorization", "Bearer ")
 	req.Header.Set("Content-Type", "audio/wav")
 	res, err := client.Do(req)
 	if err != nil {
@@ -103,20 +83,13 @@ func SendWitBuff(buffer *bytes.Buffer) string {
 	return string(body)
 }
 
-func convArgs(strArray []string) string {
-	res := ""
-	for x := 0; x < len(strArray); x++ {
-		res += strArray[x]
-	}
-	return res
-}
-
+/*
 func ContinuousRecognition() {
 	for {
 		start()
 	}
 }
-
+*/
 func start() {
 	/*
 		cwd, err := os.Getwd()

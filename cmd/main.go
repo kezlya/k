@@ -18,16 +18,21 @@ const displayWidth, displayHeight, quality = 500, 500, 80
 var config map[string]string
 
 func main() {
+	loadConfig()
+
 	screen := k.Screen{}
 
 	//playGroud(&screen)
 
-	go analogNumber(&screen)
+	//go analogNumber(&screen)
+
+	startListining()
 
 	startServer(&screen)
 }
 
 func loadConfig() {
+	config = make(map[string]string)
 	f, err := os.Open("config.ignore")
 	if err != nil {
 		log.Fatalln("Can't find config.ignore file: ", err)
@@ -36,16 +41,19 @@ func loadConfig() {
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
-		_kv := strings.Split(s.Text(),"=")
-		if len(_kv) == 2{
-			config[_kv[0]] = _kv[1]
+		kv := strings.Split(s.Text(),"=")
+		if len(kv) == 2{
+			config[kv[0]] = kv[1]
 		}
 	}
-	log.Println(s.Err())
+	if s.Err() != nil {
+		log.Fatalln("Problems with some variables in config.ignore: ", s.Err())
+	}
 }
 
 func startListining() {
-
+	hh := k.SendWitVoice("test.wav", config["WitKey"])
+	log.Println(hh)
 }
 
 func startServer(screen *k.Screen) {

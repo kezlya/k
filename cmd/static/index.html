@@ -6,9 +6,11 @@
 
     <title>The HTML5 Herald</title>
     <script type="application/javascript">
+        var ready_text = "";
+
         setInterval(function() {
             var myImageElement = document.getElementById('myImage');
-            myImageElement.src = '../stream.jpg?rand=' + Math.random();
+            myImageElement.src = '../stream.jpg?rand=' + Math.random()+"&text="+ready_text;
         }, 150);
     </script>
 
@@ -165,6 +167,7 @@
             final_transcript = capitalize(final_transcript);
             final_span.innerHTML = linebreak(final_transcript);
             interim_span.innerHTML = linebreak(interim_transcript);
+            ready_text = linebreak(interim_transcript);
             if (final_transcript || interim_transcript) {
                 showButtons('inline-block');
             }

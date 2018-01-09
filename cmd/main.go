@@ -22,11 +22,11 @@ func main() {
 
 	screen := k.Screen{}
 
-	//playGroud(&screen)
+	playGroud(&screen)
 
 	//go analogNumber(&screen)
 
-	startListining()
+	//startListining()
 
 	startServer(&screen)
 }

@@ -16,6 +16,7 @@ import (
 const displayWidth, displayHeight, quality = 500, 500, 80
 
 var config map[string]string
+var listining []string
 
 func main() {
 	loadConfig()
@@ -23,6 +24,8 @@ func main() {
 	screen := k.Screen{}
 
 	playGroud(&screen)
+
+	go debug()
 
 	//go analogNumber(&screen)
 
@@ -51,15 +54,21 @@ func loadConfig() {
 	}
 }
 
-func startListining() {
-	hh := k.SendWitVoice("test.wav", config["WitKey"])
-	log.Println(hh)
+func debug() {
+	for{
+		log.Println(listining)
+		time.Sleep(1 * time.Second)
+	}
 }
 
 func startServer(screen *k.Screen) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
+		sp := r.URL.Query().Get("speech")
+		if sp !=""{
+			listining = append(listining,sp)
+		}
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 	})
 	err := http.ListenAndServe(":9090", nil)

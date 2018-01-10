@@ -13,79 +13,21 @@
             myImageElement.src = '../stream.jpg?rand=' + Math.random()+"&speech="+ready_text;
         }, 150);
     </script>
-
     <style>
-        #info {
-            font-size: 20px;
-        }
-        #div_start {
-            float: right;
-        }
-        #headline {
-            text-decoration: none
-        }
-        #results {
-            font-size: 14px;
-            font-weight: bold;
-            border: 1px solid #ddd;
-            padding: 15px;
-            text-align: left;
-            min-height: 150px;
-        }
         #start_button {
             border: 0;
             background-color:transparent;
             padding: 0;
-        }
-        .interim {
-            color: gray;
-        }
-        .final {
-            color: black;
-            padding-right: 3px;
-        }
-        .button {
-            display: none;
-        }
-        .marquee {
-            margin: 20px auto;
-        }
-
-        #buttons {
-            margin: 10px 0;
-            position: relative;
-            top: -50px;
-        }
-
-        #copy {
-            margin-top: 20px;
-        }
-
-        #copy > div {
-            display: none;
-            margin: 0 70px;
         }
     </style>
     <style>
         a.c1 {font-weight: normal;}
     </style>
 </head>
-
-<body id="grid">
+<body>
 <img src="../stream.jpg" id="myImage" />
-<div class="browser-landing" id="main">
-    <div class="compact marquee">
-        <div id="div_start">
-            <button id="start_button" onclick="startButton(event)"><img alt="Start" id="start_img" src="mic.gif"></button>
-        </div>
-        <div id="results">
-            <span class="final" id="final_span"></span>
-            <span class="interim" id="interim_span"></span>
-        </div>
-    </div>
-</div>
+<button id="start_button" onclick="startButton(event)"><img id="start_img" src="mic.gif"></button>
 <script>
-    var create_email = false;
     var final_transcript = '';
     var recognizing = false;
     var ignore_onend;
@@ -137,16 +79,6 @@
                 return;
             }
             showInfo('');
-            if (window.getSelection) {
-                window.getSelection().removeAllRanges();
-                var range = document.createRange();
-                range.selectNode(document.getElementById('final_span'));
-                window.getSelection().addRange(range);
-            }
-            if (create_email) {
-                create_email = false;
-                createEmail();
-            }
         };
 
         recognition.onresult = function(event) {
@@ -175,39 +107,6 @@
         showInfo('info_upgrade');
     }
 
-    function createEmail() {
-        var n = final_transcript.indexOf('\n');
-        if (n < 0 || n >= 80) {
-            n = 40 + final_transcript.substring(40).indexOf(' ');
-        }
-        var subject = encodeURI(final_transcript.substring(0, n));
-        var body = encodeURI(final_transcript.substring(n + 1));
-        window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
-    }
-
-    function copyButton() {
-        if (recognizing) {
-            recognizing = false;
-            recognition.stop();
-        }
-        copy_button.style.display = 'none';
-        copy_info.style.display = 'inline-block';
-        showInfo('');
-    }
-
-    function emailButton() {
-        if (recognizing) {
-            create_email = true;
-            recognizing = false;
-            recognition.stop();
-        } else {
-            createEmail();
-        }
-        email_button.style.display = 'none';
-        email_info.style.display = 'inline-block';
-        showInfo('');
-    }
-
     function startButton(event) {
         if (recognizing) {
             recognition.stop();
@@ -217,8 +116,6 @@
         //recognition.lang = select_dialect.value;
         recognition.start();
         ignore_onend = false;
-        final_span.innerHTML = '';
-        interim_span.innerHTML = '';
         start_img.src = 'mic-off.gif';
         showInfo('info_allow');
         start_timestamp = event.timeStamp;

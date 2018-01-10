@@ -30,8 +30,6 @@ func main() {
 
 	//go analogNumber(&screen)
 
-	//startListining()
-
 	startServer(&screen)
 }
 

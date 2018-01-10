@@ -6,14 +6,126 @@
 
     <title>The HTML5 Herald</title>
     <script type="application/javascript">
+        var ready_text = "";
+
         setInterval(function() {
             var myImageElement = document.getElementById('myImage');
-            myImageElement.src = '../stream.jpg?rand=' + Math.random();
+            myImageElement.src = '../stream.jpg?rand=' + Math.random()+"&speech="+ready_text;
         }, 150);
     </script>
+    <style>
+        #start_button {
+            border: 0;
+            background-color:transparent;
+            padding: 0;
+        }
+    </style>
+    <style>
+        a.c1 {font-weight: normal;}
+    </style>
 </head>
-
 <body>
-<img src="../test.jpg" id="myImage" />
+<img src="../stream.jpg" id="myImage" />
+<button id="start_button" onclick="startButton(event)"><img id="start_img" src="mic.gif"></button>
+<script>
+    var final_transcript = '';
+    var recognizing = false;
+    var ignore_onend;
+    var start_timestamp;
+    var start_button = document.getElementById("start_button");
+    if (!('webkitSpeechRecognition' in window)) {
+        upgrade();
+    } else {
+        start_button.style.display = 'inline-block';
+        var recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = function() {
+            recognizing = true;
+            showInfo('info_speak_now');
+            start_img.src = 'mic-on.gif';
+        };
+
+        recognition.onerror = function(event) {
+            if (event.error == 'no-speech') {
+                start_img.src = 'mic.gif';
+                showInfo('info_no_speech');
+                ignore_onend = true;
+            }
+            if (event.error == 'audio-capture') {
+                start_img.src = 'mic.gif';
+                showInfo('info_no_microphone');
+                ignore_onend = true;
+            }
+            if (event.error == 'not-allowed') {
+                if (event.timeStamp - start_timestamp < 100) {
+                    showInfo('info_blocked');
+                } else {
+                    showInfo('info_denied');
+                }
+                ignore_onend = true;
+            }
+        };
+
+        recognition.onend = function() {
+            recognizing = false;
+            if (ignore_onend) {
+                return;
+            }
+            start_img.src = 'mic.gif';
+            if (!final_transcript) {
+                showInfo('info_start');
+                return;
+            }
+            showInfo('');
+        };
+
+        recognition.onresult = function(event) {
+            var interim_transcript = '';
+            if (typeof(event.results) == 'undefined') {
+                recognition.onend = null;
+                recognition.stop();
+                upgrade();
+                return;
+            }
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                } else {
+                    interim_transcript += event.results[i][0].transcript;
+                }
+            }
+            console.log("final_transcript",final_transcript);
+            console.log("interim_transcript",interim_transcript);
+            ready_text = interim_transcript;
+        };
+    }
+
+    function upgrade() {
+        start_button.style.visibility = 'hidden';
+        showInfo('info_upgrade');
+    }
+
+    function startButton(event) {
+        if (recognizing) {
+            recognition.stop();
+            return;
+        }
+        final_transcript = '';
+        //recognition.lang = select_dialect.value;
+        recognition.start();
+        ignore_onend = false;
+        start_img.src = 'mic-off.gif';
+        showInfo('info_allow');
+        start_timestamp = event.timeStamp;
+    }
+
+    function showInfo(s) {
+        if (s) {
+            console.log(s);
+        }
+    }
+</script>
 </body>
 </html>

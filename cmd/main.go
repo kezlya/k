@@ -16,16 +16,17 @@ import (
 const displayWidth, displayHeight, quality = 500, 500, 80
 
 var config map[string]string
-var listining []string
+var listening []string
 
 func main() {
+	listening = append(listening,"")
 	loadConfig()
 
 	screen := k.Screen{}
 
-	playGroud(&screen)
+	//playGroud(&screen)
 
-	go debug()
+	go listingAndShow(&screen)
 
 	//go analogNumber(&screen)
 
@@ -54,20 +55,13 @@ func loadConfig() {
 	}
 }
 
-func debug() {
-	for{
-		log.Println(listining)
-		time.Sleep(1 * time.Second)
-	}
-}
-
 func startServer(screen *k.Screen) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
 		sp := r.URL.Query().Get("speech")
-		if sp !=""{
-			listining = append(listining,sp)
+		if sp !="" && sp != listening[len(listening)-1]{
+			listening = append(listening,sp)
 		}
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 	})
@@ -86,6 +80,21 @@ func playGroud(screen *k.Screen) {
 	screen.Add(layer3)
 	screen.GridTo(k.FOUR)
 
+}
+
+func listingAndShow(screen *k.Screen){
+	var last string
+	l := k.LayerFrom(k.GoogleImage("talk",-1))
+	screen.Add(l)
+	screen.GridTo(k.EIGHT)
+	go l.ScaleUp(30, 800, true)
+
+	for {
+		last = strings.Replace(listening[len(listening)-1]," ","+",-1)
+		l.Still = k.GoogleImage(last, -1)
+		time.Sleep(2 * time.Second)
+		log.Println(listening)
+	}
 }
 
 func analogNumber(screen *k.Screen) {

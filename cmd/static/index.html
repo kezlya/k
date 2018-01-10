@@ -164,30 +164,15 @@
                     interim_transcript += event.results[i][0].transcript;
                 }
             }
-            final_transcript = capitalize(final_transcript);
-            final_span.innerHTML = linebreak(final_transcript);
-            interim_span.innerHTML = linebreak(interim_transcript);
-            ready_text = linebreak(interim_transcript);
-            if (final_transcript || interim_transcript) {
-                showButtons('inline-block');
-            }
+            console.log("final_transcript",final_transcript);
+            console.log("interim_transcript",interim_transcript);
+            ready_text = interim_transcript;
         };
     }
 
     function upgrade() {
         start_button.style.visibility = 'hidden';
         showInfo('info_upgrade');
-    }
-
-    var two_line = /\n\n/g;
-    var one_line = /\n/g;
-    function linebreak(s) {
-        return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-    }
-
-    var first_char = /\S/;
-    function capitalize(s) {
-        return s.replace(first_char, function(m) { return m.toUpperCase(); });
     }
 
     function createEmail() {
@@ -236,33 +221,13 @@
         interim_span.innerHTML = '';
         start_img.src = 'mic-off.gif';
         showInfo('info_allow');
-        showButtons('none');
         start_timestamp = event.timeStamp;
     }
 
     function showInfo(s) {
         if (s) {
-            for (var child = info.firstChild; child; child = child.nextSibling) {
-                if (child.style) {
-                    child.style.display = child.id == s ? 'inline' : 'none';
-                }
-            }
-            info.style.visibility = 'visible';
-        } else {
-            info.style.visibility = 'hidden';
+            console.log(s);
         }
-    }
-
-    var current_style;
-    function showButtons(style) {
-        if (style == current_style) {
-            return;
-        }
-        current_style = style;
-        copy_button.style.display = style;
-        email_button.style.display = style;
-        copy_info.style.display = 'none';
-        email_info.style.display = 'none';
     }
 </script>
 </body>

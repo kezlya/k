@@ -93,7 +93,7 @@ func listingAndShow(screen *k.Screen){
 		last = strings.Replace(listening[len(listening)-1]," ","+",-1)
 		l.Still = k.GoogleImage(last, -1)
 		time.Sleep(2 * time.Second)
-		log.Println(listening)
+		log.Println(len(listening),last)
 	}
 }
 

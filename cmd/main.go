@@ -82,18 +82,21 @@ func playGroud(screen *k.Screen) {
 
 func listingAndShow(screen *k.Screen){
 	var last string
+	wc := len(listening)
+	time.Sleep(5000 * time.Millisecond)
+	log.Println("start")
+
 	//screen.GridTo(k.EIGHT)
 	for {
-		last = strings.Replace(listening[len(listening)-1]," ","+",-1)
-
-	l := k.LayerFrom(k.GoogleImage(last, -1))
-	screen.Add(l)
-
-	l.ScaleUp(30, 800, false)
-
-
-		time.Sleep(1000 * time.Millisecond)
-		log.Println(len(listening),last)
+		if wc != len(listening) {
+			wc = len(listening)
+			last = strings.Replace(listening[len(listening)-1]," ","+",-1)
+			l := k.LayerFrom(k.GoogleImage(last, -1))
+			screen.Add(l)
+			go l.ScaleUp(30, 800, false)
+			log.Println(len(listening),last)
+		}
+		log.Println(wc)
 	}
 }
 

@@ -24,13 +24,16 @@ func main() {
 
 	screen := k.Screen{}
 
-	//playGroud(&screen)
 
-	go listingAndShow(&screen)
+
+	go playGroud(&screen)
+
+	//go listingAndShow(&screen)
 
 	//go analogNumber(&screen)
 
 	startServer(&screen)
+
 }
 
 func loadConfig() {
@@ -70,14 +73,17 @@ func startServer(screen *k.Screen) {
 }
 
 func playGroud(screen *k.Screen) {
-
+	screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	layer3 := k.LayerFrom(k.GoogleImage("ny+pogadi", 17))
-	go layer3.ScaleUp(33, 700, true)
-	screen.Add(layer3)
-	screen.GridTo(k.FOUR)
-
+	for i := 0; i < 10; i++ {
+		layer3 := k.LayerFrom(k.GoogleImage("ny+pogadi", -1))
+		go layer3.ScaleUp(30, 700, true)
+		screen.Add(layer3)
+		time.Sleep(1000 * time.Millisecond)
+	}
+	screen.RemoveAll()
+return
 }
 
 func listingAndShow(screen *k.Screen){

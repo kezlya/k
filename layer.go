@@ -16,7 +16,7 @@ import (
 )
 
 type Layer struct {
-	// isLive   bool maybe will use it in the future
+	removed bool
 	backup *image.RGBA
 	Still  *image.RGBA
 }
@@ -122,6 +122,9 @@ func loadFromUrl(url string) *image.RGBA {
 }
 
 func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
+	if s.removed{
+		return
+	}
 	if loop {
 		s.backup = s.Still
 	}
@@ -135,6 +138,7 @@ func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
 			break
 		}
 	}
+	log.Println("ScaleUp")
 	if loop {
 		s.Still = s.backup
 		s.ScaleUp(rate, maxWith, loop)

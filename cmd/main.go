@@ -82,7 +82,7 @@ func playGroud(screen *k.Screen) {
 
 func listingAndShow(screen *k.Screen){
 	var last string
-	screen.GridTo(k.EIGHT)
+	//screen.GridTo(k.EIGHT)
 	for {
 		last = strings.Replace(listening[len(listening)-1]," ","+",-1)
 

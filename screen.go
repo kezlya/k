@@ -27,16 +27,16 @@ func (s *Screen) Add(l *Layer) {
 	log.Println("adding layer to the screen")
 
 	//TODO: implement queue or play with recursive
-	if s.layers[0] == nil {
-		s.layers[0] = l
+	if s.layers[2] == nil {
+		s.layers[2] = l
 		return
 	} else if s.layers[1] == nil {
-		s.layers[1] = s.layers[0]
-		s.layers[0] = l
+		s.layers[1] = s.layers[2]
+		s.layers[2] = l
 	} else {
-		s.layers[2] = s.layers[1]
-		s.layers[1] = s.layers[0]
-		s.layers[0] = l
+		s.layers[0] = s.layers[1]
+		s.layers[1] = s.layers[2]
+		s.layers[2] = l
 	}
 }
 

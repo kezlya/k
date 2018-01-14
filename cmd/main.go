@@ -28,11 +28,16 @@ func main() {
 
 	//go playGroud(&screen)
 
-	go listingAndShow(&screen)
 
 	//go analogNumber(&screen)
 
+	go listingAndShow(&screen)
+
+	time.Sleep(2000 * time.Millisecond)
+
 	startServer(&screen)
+
+
 
 }
 
@@ -91,6 +96,7 @@ func listingAndShow(screen *k.Screen){
 	wc := len(listening)
 
 	for {
+
 		if len(listening) > wc {
 			wc = len(listening)
 
@@ -99,15 +105,10 @@ func listingAndShow(screen *k.Screen){
 			go l.ScaleUp(30, 800, true)
 			screen.Add(l)
 			log.Println(wc, last)
+			time.Sleep(200 * time.Millisecond)
 		}
 	}
 
-	for i := 0; i < 10; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("mountains", -1))
-		go layer3.ScaleUp(30, 700, true)
-		screen.Add(layer3)
-		time.Sleep(1000 * time.Millisecond)
-	}
 	screen.RemoveAll()
 }
 

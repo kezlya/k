@@ -77,7 +77,7 @@ func playGroud(screen *k.Screen) {
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 	for i := 0; i < 10; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("ny+pogadi", -1))
+		layer3 := k.LayerFrom(k.GoogleImage("mountains", -1))
 		go layer3.ScaleUp(30, 700, true)
 		screen.Add(layer3)
 		time.Sleep(1000 * time.Millisecond)
@@ -88,17 +88,27 @@ return
 
 func listingAndShow(screen *k.Screen){
 	var last string
-	l := k.LayerFrom(k.GoogleImage("talk",-1))
-	screen.Add(l)
-	screen.GridTo(k.EIGHT)
-	go l.ScaleUp(30, 800, true)
+	wc := len(listening)
 
 	for {
-		last = strings.Replace(listening[len(listening)-1]," ","+",-1)
-		l.Still = k.GoogleImage(last, -1)
-		time.Sleep(2 * time.Second)
-		log.Println(len(listening),last)
+		if len(listening) > wc {
+			wc = len(listening)
+
+			last = strings.Replace(listening[wc - 1], " ", "+", -1)
+			l := k.LayerFrom(k.GoogleImage(last, -1))
+			go l.ScaleUp(30, 800, true)
+			screen.Add(l)
+			log.Println(wc, last)
+		}
 	}
+
+	for i := 0; i < 10; i++ {
+		layer3 := k.LayerFrom(k.GoogleImage("mountains", -1))
+		go layer3.ScaleUp(30, 700, true)
+		screen.Add(layer3)
+		time.Sleep(1000 * time.Millisecond)
+	}
+	screen.RemoveAll()
 }
 
 func analogNumber(screen *k.Screen) {

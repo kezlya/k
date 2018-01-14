@@ -26,9 +26,9 @@ func main() {
 
 
 
-	go playGroud(&screen)
+	//go playGroud(&screen)
 
-	//go listingAndShow(&screen)
+	go listingAndShow(&screen)
 
 	//go analogNumber(&screen)
 

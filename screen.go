@@ -54,7 +54,7 @@ func (s *Screen) Remove(l *Layer) {
 	}
 }
 func (s *Screen) RemoveAll() {
-	log.Println("Removing layer from the screen")
+	log.Println("Removing All layers from the screen")
 	for _, _l := range s.layers {
 		if _l != nil {
 			s.Remove(_l)
@@ -63,6 +63,8 @@ func (s *Screen) RemoveAll() {
 }
 
 func (s *Screen) Display(width, height int) *image.RGBA {
+
+
 	o := image.Point{0, 0}
 	b := image.Rect(0, 0, width, height)
 	d := image.NewRGBA(b)

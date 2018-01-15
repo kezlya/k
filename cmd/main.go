@@ -179,25 +179,15 @@ return
 }
 
 func listingAndShow(screen *k.Screen){
-	var last string
-    wc := 0
 	screen.GridTo(k.FOUR)
 
 	for {
-		time.Sleep(200 * time.Millisecond)
-
-//		log.Println(".",wc)
-
-		if len(listening) > wc {
-			//log.Println("test3")
-
-			wc = len(listening)
-
-			last = strings.Replace(listening[wc - 1], " ", "+", -1)
-			l := k.LayerFrom(k.GoogleImage(last, -1))
+		time.Sleep(400 * time.Millisecond)
+		log.Println(words.count)
+		if w := words.Pop(); w != nil {
+			l := k.LayerFrom(k.GoogleImage(w.Value, -1))
 			go l.ScaleUp(30, 800, true)
 			screen.Add(l)
-			log.Println(wc, last)
 		}
 	}
 

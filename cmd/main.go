@@ -179,7 +179,7 @@ return
 }
 
 func listingAndShow(screen *k.Screen){
-	screen.GridTo(k.FOUR)
+	//screen.GridTo(k.FOUR)
 
 	for {
 		time.Sleep(400 * time.Millisecond)

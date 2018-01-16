@@ -33,16 +33,19 @@ func (s *Screen) Add(l *Layer) {
 	} else if s.layers[1] == nil {
 		s.layers[1] = s.layers[2]
 		s.layers[2] = l
-	} else {
-		s.layers[0] = s.layers[1]
-		s.layers[1] = s.layers[2]
-		s.layers[2] = l
+		return
+	} else if s.layers[0] != nil {
+		s.layers[0].removed = true
 	}
+	s.layers[0] = s.layers[1]
+	s.layers[1] = s.layers[2]
+	s.layers[2] = l
+	return
 }
 
 func (s *Screen) Remove(l *Layer) {
 	log.Println("Removing layer from the screen")
-
+	l.removed = true
 	for i, _l := range s.layers {
 		if _l == l {
 			s.layers[i] = nil
@@ -50,8 +53,18 @@ func (s *Screen) Remove(l *Layer) {
 		}
 	}
 }
+func (s *Screen) RemoveAll() {
+	log.Println("Removing All layers from the screen")
+	for _, _l := range s.layers {
+		if _l != nil {
+			s.Remove(_l)
+		}
+	}
+}
 
 func (s *Screen) Display(width, height int) *image.RGBA {
+
+
 	o := image.Point{0, 0}
 	b := image.Rect(0, 0, width, height)
 	d := image.NewRGBA(b)
@@ -71,10 +84,10 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 		draw.Draw(d, b, sd, o2, draw.Over)
 		draw.Draw(d, b, sd, o3, draw.Over)
 		draw.Draw(d, b, sd, o4, draw.Over)
-	} else if s.grid==EIGHT{
+	} else if s.grid == EIGHT {
 		w, h := width/4, height/4
-		for i:=0;i<4;i++ {
-			for j:=0;j<4;j++ {
+		for i := 0; i < 4; i++ {
+			for j := 0; j < 4; j++ {
 				sd := resize.Thumbnail(uint(w), uint(h), d, resize.Bicubic).(*image.RGBA)
 				draw.Draw(d, b, sd, image.Pt(-w*i, -h*j), draw.Over)
 			}

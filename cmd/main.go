@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/kezlya/k"
 	"image/jpeg"
 	"log"
@@ -9,16 +10,14 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 	"strings"
-	"fmt"
+	"time"
 )
 
 const displayWidth, displayHeight, quality = 500, 500, 80
 
 var config map[string]string
 var words *Stack
-
 
 type Node struct {
 	Value string
@@ -97,7 +96,6 @@ func (q *Queue) Pop() *Node {
 	return node
 }
 
-
 func main() {
 	loadConfig()
 
@@ -105,10 +103,7 @@ func main() {
 
 	screen := k.Screen{}
 
-
-
 	//go playGroud(&screen)
-
 
 	//go analogNumber(&screen)
 
@@ -117,8 +112,6 @@ func main() {
 	//time.Sleep(10000 * time.Millisecond)
 
 	startServer(&screen)
-
-
 
 }
 
@@ -132,8 +125,8 @@ func loadConfig() {
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
-		kv := strings.Split(s.Text(),"=")
-		if len(kv) == 2{
+		kv := strings.Split(s.Text(), "=")
+		if len(kv) == 2 {
 			config[kv[0]] = kv[1]
 		}
 	}
@@ -149,11 +142,11 @@ func startServer(screen *k.Screen) {
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 		sp := r.URL.Query().Get("speech")
-		if sp !="" && sp != lastWord {
+		if sp != "" && sp != lastWord {
 			lastWord = sp
-			all := strings.Split(sp," ")
-			for _,w :=range all {
-				words.Push( &Node{strings.TrimSpace(w) })
+			all := strings.Split(sp, " ")
+			for _, w := range all {
+				words.Push(&Node{strings.TrimSpace(w)})
 			}
 		}
 
@@ -175,10 +168,10 @@ func playGroud(screen *k.Screen) {
 		time.Sleep(1000 * time.Millisecond)
 	}
 	screen.RemoveAll()
-return
+	return
 }
 
-func listingAndShow(screen *k.Screen){
+func listingAndShow(screen *k.Screen) {
 
 	//screen.GridTo(k.EIGHT)
 	for {

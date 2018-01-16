@@ -64,7 +64,6 @@ func (s *Screen) RemoveAll() {
 
 func (s *Screen) Display(width, height int) *image.RGBA {
 
-
 	o := image.Point{0, 0}
 	b := image.Rect(0, 0, width, height)
 	d := image.NewRGBA(b)

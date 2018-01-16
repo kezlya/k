@@ -44,6 +44,13 @@ func RandomPixels(width, height int) *image.RGBA {
 	return img
 }
 
+func FlickerImage(keyword string, order int) *image.RGBA {
+	var img *image.RGBA
+
+	//https://api.flickr.com/services/feeds/photos_public.gne?tags=hello&format=json
+	return img
+}
+
 func GoogleImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
 

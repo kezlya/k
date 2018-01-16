@@ -179,8 +179,8 @@ return
 }
 
 func listingAndShow(screen *k.Screen){
-	//screen.GridTo(k.FOUR)
 
+	//screen.GridTo(k.EIGHT)
 	for {
 		time.Sleep(400 * time.Millisecond)
 		log.Println(words.count)
@@ -189,6 +189,7 @@ func listingAndShow(screen *k.Screen){
 			go l.ScaleUp(30, 800, true)
 			screen.Add(l)
 		}
+
 	}
 
 	screen.RemoveAll()

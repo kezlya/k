@@ -59,7 +59,7 @@ func startServer(screen *k.Screen) {
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
 		sp := r.URL.Query().Get("speech")
 		if sp !="" && sp != listening[len(listening)-1]{
-			listening = append(listening,sp)
+			listening = append(listening,strings.TrimSpace(sp))
 		}
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 	})
@@ -82,16 +82,21 @@ func playGroud(screen *k.Screen) {
 
 func listingAndShow(screen *k.Screen){
 	var last string
-	l := k.LayerFrom(k.GoogleImage("talk",-1))
-	screen.Add(l)
-	screen.GridTo(k.EIGHT)
-	go l.ScaleUp(30, 800, true)
+	wc := len(listening)
+	time.Sleep(5000 * time.Millisecond)
+	log.Println("start")
 
+	//screen.GridTo(k.EIGHT)
 	for {
-		last = strings.Replace(listening[len(listening)-1]," ","+",-1)
-		l.Still = k.GoogleImage(last, -1)
-		time.Sleep(2 * time.Second)
-		log.Println(len(listening),last)
+		if wc != len(listening) {
+			wc = len(listening)
+			last = strings.Replace(listening[len(listening)-1]," ","+",-1)
+			l := k.LayerFrom(k.GoogleImage(last, -1))
+			screen.Add(l)
+			go l.ScaleUp(30, 800, false)
+			log.Println(len(listening),last)
+		}
+		log.Println(wc)
 	}
 }
 

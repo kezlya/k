@@ -136,20 +136,14 @@ func loadConfig() {
 }
 
 func startServer(screen *k.Screen) {
-	lastWord := ""
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
-		sp := r.URL.Query().Get("speech")
-		if sp != "" && sp != lastWord {
-			lastWord = sp
-			all := strings.Split(sp, " ")
-			for _, w := range all {
-				words.Push(&Node{strings.TrimSpace(w)})
-			}
+		sp := r.URL.Query().Get("word")
+		if sp != "" && sp != "undefined" {
+			words.Push(&Node{strings.Replace(strings.TrimSpace(sp)," ","+",100)})
 		}
-
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -176,8 +170,8 @@ func listingAndShow(screen *k.Screen) {
 	//screen.GridTo(k.EIGHT)
 	for {
 		time.Sleep(400 * time.Millisecond)
-		log.Println(words.count)
 		if w := words.Pop(); w != nil {
+			log.Println(words.count,w.Value)
 			l := k.LayerFrom(k.GoogleImage(w.Value, -1))
 			go l.ScaleUp(30, 800, true)
 			screen.Add(l)

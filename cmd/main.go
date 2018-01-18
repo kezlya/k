@@ -103,11 +103,11 @@ func main() {
 
 	screen := k.Screen{}
 
-	//go playGroud(&screen)
+	go playGroud(&screen)
 
 	//go analogNumber(&screen)
 
-	go listingAndShow(&screen)
+	//go listingAndShow(&screen)
 
 	//time.Sleep(10000 * time.Millisecond)
 
@@ -152,14 +152,14 @@ func startServer(screen *k.Screen) {
 }
 
 func playGroud(screen *k.Screen) {
-	screen.GridTo(k.FOUR)
+	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 	for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.GoogleImage("mountains", -1))
-		go layer3.ScaleUp(30, 700, true)
+		go layer3.FadeOut(100)
 		screen.Add(layer3)
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(10000 * time.Millisecond)
 	}
 	screen.RemoveAll()
 	return

@@ -13,8 +13,6 @@ import (
 	"net/http"
 	"time"
 	"fmt"
-	"golang.org/x/tools/go/gcimporter15/testdata"
-	"golang.org/x/mobile/event/size"
 )
 
 type Layer struct {
@@ -179,26 +177,22 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 	}
 }
 
-func (s *Layer) FadeOut(rate time.Duration){
+func (s *Layer) BurnOut(rate time.Duration){
 	notFullyTransperent := true
 	for {
 		if s.removed{
+			log.Println("FadeOut stopped")
 			return
 		}
+
 		time.Sleep(rate * time.Millisecond)
 		if notFullyTransperent {
-			nA :=s.Still.RGBAAt(1,1).A<<5
-			nPixel := color.RGBA{s.Still.RGBAAt(1,1).R,
-			s.Still.RGBAAt(1,1).G,
-			s.Still.RGBAAt(1,1).B,
-			nA}
-
-			s.Still.SetRGBA(1,1, nPixel)
-
 			for y := s.Still.Rect.Min.Y; y < s.Still.Rect.Max.Y; y++ {
 				for x := s.Still.Rect.Min.X; x < s.Still.Rect.Max.X; x++ {
 					pix:=s.Still.RGBAAt(x,y)
-					if pix.A < 255 {
+					//log.Println(pix)
+
+					if pix.A > 5 {
 						notFullyTransperent = true
 						nA :=pix.A-5
 						pix.A = nA
@@ -207,6 +201,7 @@ func (s *Layer) FadeOut(rate time.Duration){
 				}
 			}
 		} else {
+			log.Println("fully transperent")
 			break
 		}
 	}

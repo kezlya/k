@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"time"
 	"fmt"
+	"golang.org/x/tools/go/gcimporter15/testdata"
+	"golang.org/x/mobile/event/size"
 )
 
 type Layer struct {
@@ -178,17 +180,53 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 }
 
 func (s *Layer) FadeOut(rate time.Duration){
-	if s.removed{
-		return
-	}
+	notFullyTransperent := true
+	for {
+		if s.removed{
+			return
+		}
+		time.Sleep(rate * time.Millisecond)
+		if notFullyTransperent {
+			nA :=s.Still.RGBAAt(1,1).A<<5
+			nPixel := color.RGBA{s.Still.RGBAAt(1,1).R,
+			s.Still.RGBAAt(1,1).G,
+			s.Still.RGBAAt(1,1).B,
+			nA}
 
+			s.Still.SetRGBA(1,1, nPixel)
+
+			for y := s.Still.Rect.Min.Y; y < s.Still.Rect.Max.Y; y++ {
+				for x := s.Still.Rect.Min.X; x < s.Still.Rect.Max.X; x++ {
+					pix:=s.Still.RGBAAt(x,y)
+					if pix.A < 255 {
+						notFullyTransperent = true
+						nA :=pix.A-5
+						pix.A = nA
+						s.Still.SetRGBA(x,y, pix)
+					}
+				}
+			}
+		} else {
+			break
+		}
+	}
 }
 
 func (s *Layer) FadeIn(rate time.Duration){
-	if s.removed{
-		return
+	s.backup = s.Still
+	for {
+		if s.removed{
+			return
+		}
+		time.Sleep(rate * time.Millisecond)
+		size := s.Still.Rect.Size()
+		if size.X > 5 && size.Y > 5 {
+			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), s.Still, resize.Bicubic)
+			s.Still = bb.(*image.RGBA)
+		} else {
+			break
+		}
 	}
-
 }
 
 func mirror(n int) int {

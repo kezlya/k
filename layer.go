@@ -1,6 +1,7 @@
 package k
 
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/nfnt/resize"
 	"image"
@@ -12,13 +13,12 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
-	"fmt"
 )
 
 type Layer struct {
 	removed bool
-	backup *image.RGBA
-	Still  *image.RGBA
+	backup  *image.RGBA
+	Still   *image.RGBA
 }
 
 func LayerFrom(img *image.RGBA) *Layer {
@@ -133,14 +133,14 @@ func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
 		s.backup = s.Still
 	}
 	for {
-		if s.removed{
+		if s.removed {
 			loop = false
 			return
 		}
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
 		if size.X < maxWith {
-			bb := resize.Resize(uint(size.X+5),0, s.Still, resize.Bicubic)
+			bb := resize.Resize(uint(size.X+5), 0, s.Still, resize.Bicubic)
 			s.Still = bb.(*image.RGBA)
 		} else {
 			break
@@ -158,7 +158,7 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 		s.backup = s.Still
 	}
 	for {
-		if s.removed{
+		if s.removed {
 			loop = false
 			return
 		}
@@ -177,40 +177,38 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 	}
 }
 
-func (s *Layer) BurnOut(rate time.Duration){
-	notFullyTransperent := true
+func (s *Layer) BurnOut(rate time.Duration) {
+	isOpaque := true
 	for {
-		if s.removed{
-			log.Println("FadeOut stopped")
+		if s.removed {
+			log.Println("BurnOut stopped")
 			return
 		}
-
 		time.Sleep(rate * time.Millisecond)
-		if notFullyTransperent {
-			for y := s.Still.Rect.Min.Y; y < s.Still.Rect.Max.Y; y++ {
-				for x := s.Still.Rect.Min.X; x < s.Still.Rect.Max.X; x++ {
-					pix:=s.Still.RGBAAt(x,y)
-					//log.Println(pix)
-
-					if pix.A > 5 {
-						notFullyTransperent = true
-						nA :=pix.A-5
-						pix.A = nA
-						s.Still.SetRGBA(x,y, pix)
+		if isOpaque {
+			isOpaque = false
+			r := s.Still.Rect
+			for y := r.Min.Y; y < r.Max.Y; y++ {
+				for x := r.Min.X; x < r.Max.X; x++ {
+					p := s.Still.RGBAAt(x, y)
+					if p.A > 5 {
+						isOpaque = true
+						p.A = p.A - 5
+						s.Still.SetRGBA(x, y, p)
 					}
 				}
 			}
 		} else {
-			log.Println("fully transperent")
 			break
 		}
 	}
+	log.Println("BurnOut ended")
 }
 
-func (s *Layer) FadeIn(rate time.Duration){
+func (s *Layer) FadeIn(rate time.Duration) {
 	s.backup = s.Still
 	for {
-		if s.removed{
+		if s.removed {
 			return
 		}
 		time.Sleep(rate * time.Millisecond)
@@ -230,4 +228,3 @@ func mirror(n int) int {
 	}
 	return n
 }
-

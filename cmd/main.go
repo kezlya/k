@@ -157,9 +157,9 @@ func playGroud(screen *k.Screen) {
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 	for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.GoogleImage("mountains", -1))
-		go layer3.FadeOut(100)
 		screen.Add(layer3)
-		time.Sleep(10000 * time.Millisecond)
+		go layer3.BurnOut(100)
+		time.Sleep(2000 * time.Millisecond)
 	}
 	screen.RemoveAll()
 	return

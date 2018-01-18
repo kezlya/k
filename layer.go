@@ -172,6 +172,14 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 	}
 }
 
+func (s *Layer) FadeOut(rate time.Duration){
+
+}
+
+func (s *Layer) FadeIn(rate time.Duration){
+
+}
+
 func mirror(n int) int {
 	if n > 127 {
 		return n - 127
@@ -179,9 +187,3 @@ func mirror(n int) int {
 	return n
 }
 
-func fade(n, m int) int {
-	if n > m {
-		return n - m
-	}
-	return 0
-}

@@ -129,13 +129,14 @@ func loadFromUrl(url string) *image.RGBA {
 }
 
 func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
-	if s.removed{
-		return
-	}
 	if loop {
 		s.backup = s.Still
 	}
 	for {
+		if s.removed{
+			loop = false
+			return
+		}
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
 		if size.X < maxWith {
@@ -157,6 +158,10 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 		s.backup = s.Still
 	}
 	for {
+		if s.removed{
+			loop = false
+			return
+		}
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
 		if size.X > 5 && size.Y > 5 {
@@ -173,10 +178,16 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 }
 
 func (s *Layer) FadeOut(rate time.Duration){
+	if s.removed{
+		return
+	}
 
 }
 
 func (s *Layer) FadeIn(rate time.Duration){
+	if s.removed{
+		return
+	}
 
 }
 

@@ -155,13 +155,19 @@ func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	for i := 0; i < 10; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("mountains", -1))
+	//for i := 0; i < 10; i++ {
+		layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
 		screen.Add(layer3)
-		go layer3.BurnOut(100)
-		time.Sleep(2000 * time.Millisecond)
-	}
-	screen.RemoveAll()
+	time.Sleep(2000 * time.Millisecond)
+
+	layer1 := k.LayerFrom(k.RandomPixels(400,400))
+	screen.Add(layer1)
+	go layer1.FadeOut(100)
+
+	//go layer3.FadeOut(100)
+		//time.Sleep(20000 * time.Millisecond)
+	//}
+	//screen.RemoveAll()
 	return
 }
 

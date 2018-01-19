@@ -205,6 +205,50 @@ func (s *Layer) BurnOut(rate time.Duration) {
 	log.Println("BurnOut ended")
 }
 
+func (s *Layer) FadeOut(rate time.Duration) {
+	isOpaque := true
+	for {
+		if s.removed {
+			log.Println("FadeOut stopped")
+			return
+		}
+		time.Sleep(rate * time.Millisecond)
+		if isOpaque {
+			isOpaque = false
+			r := s.Still.Rect
+			for y := r.Min.Y; y < r.Max.Y; y++ {
+				for x := r.Min.X; x < r.Max.X; x++ {
+					p := s.Still.RGBAAt(x, y)
+					if p.R > 5 {
+						isOpaque = true
+						p.R = p.R - 5
+					}
+					if p.B > 5 {
+						isOpaque = true
+						p.B = p.B - 5
+					}
+					if p.G > 5 {
+						isOpaque = true
+						p.G = p.G - 5
+					}
+					if p.A > 5 {
+						isOpaque = true
+						p.A = p.A - 5
+					}
+					s.Still.SetRGBA(x, y, p)
+
+					if x ==10 && y == 10 {
+						log.Println(p)
+					}
+				}
+			}
+		} else {
+			break
+		}
+	}
+	log.Println("FadeOut ended")
+}
+
 func (s *Layer) FadeIn(rate time.Duration) {
 	s.backup = s.Still
 	for {

@@ -103,7 +103,9 @@ func main() {
 
 	screen := k.Screen{}
 
-	go playGroud(&screen)
+	//go playGroud(&screen)
+
+	go RecoverDamage(&screen)
 
 	//go analogNumber(&screen)
 
@@ -158,16 +160,25 @@ func playGroud(screen *k.Screen) {
 	//for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
 		screen.Add(layer3)
-	time.Sleep(2000 * time.Millisecond)
+	//time.Sleep(2000 * time.Millisecond)
 
-	layer1 := k.LayerFrom(k.RandomPixels(400,400))
+	layer1 := k.LayerFrom(k.RandomAlpha(500,500))
 	screen.Add(layer1)
-	go layer1.FadeOut(100)
+	go layer1.FadeOut(200)
 
 	//go layer3.FadeOut(100)
 		//time.Sleep(20000 * time.Millisecond)
 	//}
 	//screen.RemoveAll()
+	return
+}
+
+func RecoverDamage(screen *k.Screen) {
+	layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
+	screen.Add(layer3)
+	layer1 := k.LayerFrom(k.RandomAlpha(500,500))
+	screen.Add(layer1)
+	go layer1.FadeOut(200)
 	return
 }
 

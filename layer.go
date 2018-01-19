@@ -44,6 +44,21 @@ func RandomPixels(width, height int) *image.RGBA {
 	return img
 }
 
+func RandomAlpha(width, height int) *image.RGBA {
+	sq := image.Rectangle{
+		image.Point{0, 0},
+		image.Point{width, height}}
+	var img *image.RGBA
+	img = image.NewRGBA(sq)
+	for x := 0; x < 500; x++ {
+		for y := 0; y < 500; y++ {
+			img.SetRGBA(x, y, color.RGBA{0, 0, 0, uint8(rand.Intn(255))})
+		}
+	}
+	return img
+}
+
+
 func FlickerImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
 
@@ -236,10 +251,6 @@ func (s *Layer) FadeOut(rate time.Duration) {
 						p.A = p.A - 5
 					}
 					s.Still.SetRGBA(x, y, p)
-
-					if x ==10 && y == 10 {
-						log.Println(p)
-					}
 				}
 			}
 		} else {

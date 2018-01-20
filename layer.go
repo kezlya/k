@@ -262,19 +262,45 @@ func (s *Layer) FadeOut(rate time.Duration) {
 
 func (s *Layer) FadeIn(rate time.Duration) {
 	s.backup = s.Still
+	s.Still = blank()
+	isOpaque := true
 	for {
 		if s.removed {
+			log.Println("FadeIn stopped")
 			return
 		}
 		time.Sleep(rate * time.Millisecond)
-		size := s.Still.Rect.Size()
-		if size.X > 5 && size.Y > 5 {
-			bb := resize.Thumbnail(uint(size.X-5), uint(size.Y-5), s.Still, resize.Bicubic)
-			s.Still = bb.(*image.RGBA)
+		if isOpaque {
+			isOpaque = false
+			r := s.Still.Rect
+			for y := r.Min.Y; y < r.Max.Y; y++ {
+				for x := r.Min.X; x < r.Max.X; x++ {
+					p := s.Still.RGBAAt(x, y)
+					pb := s.backup.RGBAAt(x,y)
+					if p.R <= pb.R - 5 {
+						isOpaque = true
+						p.R = p.R + 5
+					}
+					if p.B <= pb.B - 5 {
+						isOpaque = true
+						p.B = p.B + 5
+					}
+					if p.G <= pb.G - 5 {
+						isOpaque = true
+						p.G = p.G + 5
+					}
+					if p.A <= pb.A - 5 {
+						isOpaque = true
+						p.A = p.A + 5
+					}
+					s.Still.SetRGBA(x, y, p)
+				}
+			}
 		} else {
 			break
 		}
 	}
+	log.Println("FadeIn ended")
 }
 
 func mirror(n int) int {

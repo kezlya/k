@@ -103,9 +103,9 @@ func main() {
 
 	screen := k.Screen{}
 
-	//go playGroud(&screen)
+	go playGroud(&screen)
 
-	go RecoverDamage(&screen)
+	//go RecoverDamage(&screen)
 
 	//go analogNumber(&screen)
 
@@ -155,19 +155,13 @@ func startServer(screen *k.Screen) {
 
 func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
-	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 	//for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
+		go layer3.FadeIn(100)
 		screen.Add(layer3)
-	//time.Sleep(2000 * time.Millisecond)
+		//time.Sleep(2000 * time.Millisecond)
 
-	layer1 := k.LayerFrom(k.RandomAlpha(500,500))
-	screen.Add(layer1)
-	go layer1.FadeOut(200)
-
-	//go layer3.FadeOut(100)
-		//time.Sleep(20000 * time.Millisecond)
 	//}
 	//screen.RemoveAll()
 	return
@@ -176,7 +170,7 @@ func playGroud(screen *k.Screen) {
 func RecoverDamage(screen *k.Screen) {
 	layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
 	screen.Add(layer3)
-	layer1 := k.LayerFrom(k.RandomAlpha(500,500))
+	layer1 := k.LayerFrom(k.RandomAlpha(displayWidth,displayHeight))
 	screen.Add(layer1)
 	go layer1.FadeOut(200)
 	return

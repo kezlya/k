@@ -91,7 +91,7 @@ func GoogleImage(keyword string, order int) *image.RGBA {
 	})
 
 	if img == nil {
-		img = blank()
+		img = blank(1,1)
 	}
 	return img
 }
@@ -101,7 +101,7 @@ func OnlineImage(url string) *image.RGBA {
 
 	img = loadFromUrl(url)
 	if img == nil {
-		img = blank()
+		img = blank(1,1)
 	}
 	return img
 }
@@ -262,7 +262,7 @@ func (s *Layer) FadeOut(rate time.Duration) {
 
 func (s *Layer) FadeIn(rate time.Duration) {
 	s.backup = s.Still
-	s.Still = blank()
+	s.Still = blank(s.backup.Rect.Max.X,s.backup.Rect.Max.Y)
 	isOpaque := true
 	for {
 		if s.removed {

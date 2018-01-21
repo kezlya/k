@@ -277,21 +277,21 @@ func (s *Layer) FadeIn(rate time.Duration) {
 				for x := r.Min.X; x < r.Max.X; x++ {
 					p := s.Still.RGBAAt(x, y)
 					pb := s.backup.RGBAAt(x,y)
-					if p.R <= pb.R - 1 {
+					if p.R < pb.R {
 						isOpaque = true
-						p.R = p.R + 1
+						p.R++
 					}
-					if p.B <= pb.B - 1 {
+					if p.B < pb.B {
 						isOpaque = true
-						p.B = p.B + 1
+						p.B++
 					}
-					if p.G <= pb.G - 1 {
+					if p.G < pb.G  {
 						isOpaque = true
-						p.G = p.G + 1
+						p.G++
 					}
-					if p.A <= pb.A - 1 {
+					if p.A <pb.A{
 						isOpaque = true
-						p.A = p.A + 1
+						p.A++
 					}
 					s.Still.SetRGBA(x, y, p)
 				}

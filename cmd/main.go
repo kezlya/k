@@ -156,14 +156,14 @@ func startServer(screen *k.Screen) {
 func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	for i := 0; i < 10; i++ {
+	//for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.GoogleImage("Flowers",-1))
-		go layer3.FadeIn(50)
+		go layer3.FadeIn(10)
 		screen.Add(layer3)
-		time.Sleep(20000 * time.Millisecond)
+		time.Sleep(10000 * time.Millisecond)
 
-	}
-	screen.RemoveAll()
+	//}
+	//screen.RemoveAll()
 	return
 }
 

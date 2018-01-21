@@ -155,7 +155,7 @@ func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
 		if size.X < maxWith {
-			bb := resize.Resize(uint(size.X+5), 0, s.Still, resize.Bicubic)
+			bb := resize.Resize(uint(size.X+2), 0, s.Still, resize.Bicubic)
 			s.Still = bb.(*image.RGBA)
 		} else {
 			break

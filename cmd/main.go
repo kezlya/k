@@ -97,8 +97,8 @@ func BestEffectSoFar(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.GoogleImage("png",-1))
-		go layer3.FadeIn(5)
-		go layer3.ScaleUp(200,500,false)
+		go layer3.FadeIn(7)
+		go layer3.ScaleUp(70,500,false)
 		screen.Add(layer3)
 		time.Sleep(2000 * time.Millisecond)
 

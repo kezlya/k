@@ -27,7 +27,7 @@ func main() {
 
 	screen := k.Screen{}
 
-	//go BestEffectSoFar(&screen)
+	go BestEffectSoFar(&screen)
 
 	//go playGroud(&screen)
 
@@ -35,7 +35,7 @@ func main() {
 
 	//go analogNumber(&screen)
 
-	go listingAndShow(&screen)
+	//go listingAndShow(&screen)
 
 	//time.Sleep(10000 * time.Millisecond)
 
@@ -94,13 +94,13 @@ func playGroud(screen *k.Screen) {
 }
 
 func BestEffectSoFar(screen *k.Screen) {
-	//screen.GridTo(k.FOUR)
+	screen.GridTo(k.FOUR)
 	for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.GoogleImage("flowers",-1))
-		//go layer3.FadeIn(7)
-		go layer3.ScaleUp(70,500,false)
+		go layer3.BurnOut(7)
+		go layer3.ScaleUp(30,800,false)
 		screen.Add(layer3)
-		time.Sleep(2000 * time.Millisecond)
+		time.Sleep(3000 * time.Millisecond)
 
 	}
 	screen.RemoveAll()

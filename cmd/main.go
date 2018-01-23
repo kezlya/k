@@ -27,7 +27,7 @@ func main() {
 
 	screen := k.Screen{}
 
-	go BestEffectSoFar(&screen)
+	//go BestEffectSoFar(&screen)
 
 	//go playGroud(&screen)
 
@@ -35,7 +35,7 @@ func main() {
 
 	//go analogNumber(&screen)
 
-	//go listingAndShow(&screen)
+	go listingAndShow(&screen)
 
 	//time.Sleep(10000 * time.Millisecond)
 
@@ -96,8 +96,8 @@ func playGroud(screen *k.Screen) {
 func BestEffectSoFar(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	for i := 0; i < 10; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("png",-1))
-		go layer3.FadeIn(7)
+		layer3 := k.LayerFrom(k.GoogleImage("flowers",-1))
+		//go layer3.FadeIn(7)
 		go layer3.ScaleUp(70,500,false)
 		screen.Add(layer3)
 		time.Sleep(2000 * time.Millisecond)
@@ -123,6 +123,8 @@ func listingAndShow(screen *k.Screen) {
 		time.Sleep(400 * time.Millisecond)
 		if w := words.Pop(); w != nil {
 			l := k.LayerFrom(k.GoogleImage(w.Value, -1))
+			go l.FadeIn(7)
+
 			go l.ScaleUp(30, 800, true)
 			screen.Add(l)
 		}

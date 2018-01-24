@@ -63,7 +63,6 @@ func (s *Screen) RemoveAll() {
 }
 
 func (s *Screen) Display(width, height int) *image.RGBA {
-
 	o := image.Point{0, 0}
 	b := image.Rect(0, 0, width, height)
 	d := image.NewRGBA(b)
@@ -100,7 +99,7 @@ func (s *Screen) GridTo(size DisplayGrid) {
 	s.grid = size
 }
 
-func blank() *image.RGBA {
-	sq := image.Rectangle{image.Point{0, 0}, image.Point{100, 100}}
+func blank(width, height int) *image.RGBA {
+	sq := image.Rectangle{image.Point{0, 0}, image.Point{width, height}}
 	return image.NewRGBA(sq)
 }

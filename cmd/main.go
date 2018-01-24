@@ -27,9 +27,9 @@ func main() {
 
 	screen := k.Screen{}
 
-	go BestEffectSoFar(&screen)
+	//go BestEffectSoFar(&screen)
 
-	//go playGroud(&screen)
+	go playGroud(&screen)
 
 	//go RecoverDamage(&screen)
 
@@ -82,11 +82,14 @@ func startServer(screen *k.Screen) {
 func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	for i := 0; i < 10; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("Flowers",-1))
-		go layer3.FadeIn(5)
+	for i := 0; i < 15; i++ {
+		layer3 := k.LayerFrom(k.GoogleImage("cats",-1))
+		go layer3.RandomEffect()
+		go layer3.RandomEffect()
+		go layer3.RandomEffect()
+
 		screen.Add(layer3)
-		time.Sleep(2000 * time.Millisecond)
+		time.Sleep(3000 * time.Millisecond)
 
 	}
 	screen.RemoveAll()

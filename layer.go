@@ -58,7 +58,6 @@ func RandomAlpha(width, height int) *image.RGBA {
 	return img
 }
 
-
 func FlickerImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
 
@@ -141,6 +140,24 @@ func loadFromUrl(url string) *image.RGBA {
 	default:
 		return nil
 	}
+}
+
+func (s *Layer) RandomEffect() {
+	rand.Seed(time.Now().UnixNano())
+	n := rand.Intn(4)
+	switch n {
+	case 0:
+		s.BurnOut(time.Duration(rand.Intn(500)))
+	case 1:
+		s.ScaleUp(time.Duration(rand.Intn(500)),rand.Intn(700),true)
+	case 2:
+		s.ScaleDown(time.Duration(rand.Intn(500)),true)
+	case 3:
+		s.FadeOut(time.Duration(rand.Intn(500)))
+	case 4:
+		s.FadeIn(time.Duration(rand.Intn(500)))
+	}
+
 }
 
 func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {

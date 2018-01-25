@@ -29,13 +29,13 @@ func main() {
 
 	//go BestEffectSoFar(&screen)
 
-	go playGroud(&screen)
+	//go playGroud(&screen)
 
 	//go RecoverDamage(&screen)
 
 	//go analogNumber(&screen)
 
-	//go listingAndShow(&screen)
+	go listingAndShow(&screen)
 
 	//time.Sleep(10000 * time.Millisecond)
 
@@ -123,12 +123,12 @@ func listingAndShow(screen *k.Screen) {
 
 	//screen.GridTo(k.EIGHT)
 	for {
-		time.Sleep(400 * time.Millisecond)
+		time.Sleep(2000 * time.Millisecond)
 		if w := words.Pop(); w != nil {
 			l := k.LayerFrom(k.GoogleImage(w.Value, -1))
-			go l.FadeIn(7)
-
-			go l.ScaleUp(30, 800, true)
+			go l.RandomEffect()
+			go l.RandomEffect()
+			go l.RandomEffect()
 			screen.Add(l)
 		}
 

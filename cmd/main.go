@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 	"strings"
+	"fmt"
 )
 
 const displayWidth, displayHeight, quality = 500, 500, 80
@@ -26,8 +27,10 @@ func main() {
 
 	//playGroud(&screen)
 
-	go listingAndShow(&screen)
+	//go listingAndShow(&screen)
 
+	hh := k.FlickerImage("today",1)
+	fmt.Println(hh)
 	//go analogNumber(&screen)
 
 	startServer(&screen)

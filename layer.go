@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"time"
 	"fmt"
+	"bytes"
 )
 
 type Layer struct {
@@ -46,8 +47,24 @@ func RandomPixels(width, height int) *image.RGBA {
 
 func FlickerImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
+	resp, err := http.Get("https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=" + keyword )
+	if err != nil {
+		log.Println(err)
+	}
 
-	//https://api.flickr.com/services/feeds/photos_public.gne?tags=hello&format=json
+	defer resp.Body.Close()
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	respStr := string(buf.Bytes())
+	log.Println(respStr)
+//jsonFlickrFeed(
+	//if err := json.Unmarshal(respByte, &countryList); err != nil {
+	//	return nil, err
+	//}
+
+	if img == nil {
+		img = blank()
+	}
 	return img
 }
 

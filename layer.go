@@ -58,7 +58,14 @@ type flickerFeed struct {
 }
 
 func FlickerImage(keyword string, order int) *image.RGBA {
+	var fImg flickerFeed
 	var img *image.RGBA
+
+	if order < 0 || order > 19 {
+		rand.Seed(time.Now().UnixNano())
+		order = rand.Intn(19)
+	}
+
 	resp, err := http.Get("https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=" + keyword )
 	if err != nil {
 		log.Println(err)
@@ -71,14 +78,11 @@ func FlickerImage(keyword string, order int) *image.RGBA {
 	respStr = strings.TrimPrefix(respStr, "jsonFlickrFeed(")
 	respStr = strings.TrimSuffix(respStr, ")")
 
-	var fImg flickerFeed
-
 	if err = json.Unmarshal([]byte(respStr), &fImg); err != nil {
 		log.Println(err, "Flicker json error")
 	}
 
-	log.Println("Images", fImg)
-
+	img = OnlineImage(fImg.Images[order].Media.Url)
 	if img == nil {
 		img = blank()
 	}

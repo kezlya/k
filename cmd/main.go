@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"time"
 	"strings"
-	"fmt"
 )
 
 const displayWidth, displayHeight, quality = 500, 500, 80
@@ -25,12 +24,10 @@ func main() {
 
 	screen := k.Screen{}
 
-	//playGroud(&screen)
+	playGroud(&screen)
 
 	//go listingAndShow(&screen)
 
-	hh := k.FlickerImage("today",1)
-	fmt.Println(hh)
 	//go analogNumber(&screen)
 
 	startServer(&screen)
@@ -76,7 +73,7 @@ func playGroud(screen *k.Screen) {
 
 	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	layer3 := k.LayerFrom(k.GoogleImage("ny+pogadi", 17))
+	layer3 := k.LayerFrom(k.FlickerImage("flower", -1))
 	go layer3.ScaleUp(33, 700, true)
 	screen.Add(layer3)
 	screen.GridTo(k.FOUR)

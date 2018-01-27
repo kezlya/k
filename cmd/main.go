@@ -13,12 +13,10 @@ import (
 	"time"
 )
 
-const displayWidth, displayHeight, quality = 200, 200, 80
+const displayWidth, displayHeight, quality = 200, 100, 80
 
 var config map[string]string
 var words *k.Stack
-
-
 
 func main() {
 	loadConfig()
@@ -70,7 +68,7 @@ func startServer(screen *k.Screen) {
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 		sp := r.URL.Query().Get("word")
 		if sp != "" && sp != "undefined" {
-			words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp)," ","+",100)})
+			words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp), " ", "+", 100)})
 		}
 	})
 	err := http.ListenAndServe(":9090", nil)
@@ -84,24 +82,25 @@ func playGroud(screen *k.Screen) {
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 
 	for {
-		words.Push(&k.Node{"lips"})
-		words.Push(&k.Node{"sunshine"})
-		words.Push(&k.Node{"eyes"})
-		words.Push(&k.Node{"mountains"})
-		words.Push(&k.Node{"eye"})
-		words.Push(&k.Node{"space"})
-		words.Push(&k.Node{"macro"})
-		words.Push(&k.Node{"sky"})
-		words.Push(&k.Node{"coffee"})
+
 		if w := words.Pop(); w != nil {
-			for i := 0; i < 3; i++ {
+			for i := 0; i < 2; i++ {
 				layer3 := k.LayerFrom(k.FlickerImage(w.Value, -1))
 				go layer3.FadeIn(20)
 				go layer3.RandomEffect()
 
 				screen.Add(layer3)
-				time.Sleep(2000 * time.Millisecond)
+				time.Sleep(3000 * time.Millisecond)
 			}
+		} else {
+			words.Push(&k.Node{"sky"})
+			words.Push(&k.Node{"macro"})
+			words.Push(&k.Node{"mountains"})
+			words.Push(&k.Node{"eye"})
+			words.Push(&k.Node{"space"})
+			words.Push(&k.Node{"lips"})
+			words.Push(&k.Node{"sunshine"})
+			words.Push(&k.Node{"eyes"})
 		}
 	}
 	screen.RemoveAll()
@@ -111,9 +110,9 @@ func playGroud(screen *k.Screen) {
 func BestEffectSoFar(screen *k.Screen) {
 	screen.GridTo(k.FOUR)
 	for i := 0; i < 10; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("flowers",-1))
+		layer3 := k.LayerFrom(k.GoogleImage("flowers", -1))
 		go layer3.BurnOut(7)
-		go layer3.ScaleUp(30,800,false)
+		go layer3.ScaleUp(30, 800, false)
 		screen.Add(layer3)
 		time.Sleep(3000 * time.Millisecond)
 
@@ -125,7 +124,7 @@ func BestEffectSoFar(screen *k.Screen) {
 func RecoverDamage(screen *k.Screen) {
 	layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
 	screen.Add(layer3)
-	layer1 := k.LayerFrom(k.RandomAlpha(displayWidth,displayHeight))
+	layer1 := k.LayerFrom(k.RandomAlpha(displayWidth, displayHeight))
 	screen.Add(layer1)
 	go layer1.FadeOut(200)
 	return

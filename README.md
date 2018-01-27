@@ -5,6 +5,12 @@
 
 ##Samples:
 <br>
+<img width="250" src="cmd/art/22.png">
+<img width="250" src="cmd/art/21.png">
+<img width="250" src="cmd/art/20.png">
+<img width="250" src="cmd/art/19.png">
+<img width="250" src="cmd/art/18.png">
+<img width="250" src="cmd/art/17.png">
 <img width="250" src="cmd/art/16.png">
 <img width="250" src="cmd/art/15.png">
 <img width="250" src="cmd/art/14.png">

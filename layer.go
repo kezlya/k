@@ -1,6 +1,7 @@
 package k
 
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/nfnt/resize"
 	"image"
@@ -12,16 +13,16 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
-	"fmt"
+
 	"bytes"
-	"strings"
 	"encoding/json"
+	"strings"
 )
 
 type Layer struct {
-	// isLive   bool maybe will use it in the future
-	backup *image.RGBA
-	Still  *image.RGBA
+	removed bool
+	backup  *image.RGBA
+	Still   *image.RGBA
 }
 
 func LayerFrom(img *image.RGBA) *Layer {
@@ -47,17 +48,29 @@ func RandomPixels(width, height int) *image.RGBA {
 	return img
 }
 
-type flickerImage struct {
-	Media struct{
-		Url string `json:"m"`
-	} `json:"media"`
-}
-
-type flickerFeed struct {
-	Images []flickerImage `json:"items"`
+func RandomAlpha(width, height int) *image.RGBA {
+	sq := image.Rectangle{
+		image.Point{0, 0},
+		image.Point{width, height}}
+	var img *image.RGBA
+	img = image.NewRGBA(sq)
+	for x := 0; x < 500; x++ {
+		for y := 0; y < 500; y++ {
+			img.SetRGBA(x, y, color.RGBA{0, 0, 0, uint8(rand.Intn(255))})
+		}
+	}
+	return img
 }
 
 func FlickerImage(keyword string, order int) *image.RGBA {
+	type flickerImage struct {
+		Media struct {
+			Url string `json:"m"`
+		} `json:"media"`
+	}
+	type flickerFeed struct {
+		Images []flickerImage `json:"items"`
+	}
 	var fImg flickerFeed
 	var img *image.RGBA
 
@@ -66,7 +79,7 @@ func FlickerImage(keyword string, order int) *image.RGBA {
 		order = rand.Intn(19)
 	}
 
-	resp, err := http.Get("https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=" + keyword )
+	resp, err := http.Get("https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=" + keyword)
 	if err != nil {
 		log.Println(err)
 	}
@@ -84,7 +97,7 @@ func FlickerImage(keyword string, order int) *image.RGBA {
 
 	img = OnlineImage(fImg.Images[order].Media.Url)
 	if img == nil {
-		img = blank()
+		img = blank(1,1)
 	}
 	return img
 }
@@ -114,7 +127,7 @@ func GoogleImage(keyword string, order int) *image.RGBA {
 	})
 
 	if img == nil {
-		img = blank()
+		img = blank(1, 1)
 	}
 	return img
 }
@@ -124,7 +137,7 @@ func OnlineImage(url string) *image.RGBA {
 
 	img = loadFromUrl(url)
 	if img == nil {
-		img = blank()
+		img = blank(1, 1)
 	}
 	return img
 }
@@ -166,20 +179,43 @@ func loadFromUrl(url string) *image.RGBA {
 	}
 }
 
+func (s *Layer) RandomEffect() {
+	rand.Seed(time.Now().UnixNano())
+	n := rand.Intn(4)
+	switch n {
+	case 0:
+		s.BurnOut(time.Duration(rand.Intn(500)))
+	case 1:
+		s.ScaleUp(time.Duration(rand.Intn(500)), rand.Intn(700), true)
+	case 2:
+		s.ScaleDown(time.Duration(rand.Intn(500)), true)
+	case 3:
+		s.FadeOut(time.Duration(rand.Intn(500)))
+	case 4:
+		s.FadeIn(time.Duration(rand.Intn(500)))
+	}
+
+}
+
 func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {
 	if loop {
 		s.backup = s.Still
 	}
 	for {
+		if s.removed {
+			loop = false
+			return
+		}
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
 		if size.X < maxWith {
-			bb := resize.Resize(uint(size.X+5),0, s.Still, resize.Bicubic)
+			bb := resize.Resize(uint(size.X+2), 0, s.Still, resize.Bicubic)
 			s.Still = bb.(*image.RGBA)
 		} else {
 			break
 		}
 	}
+	log.Println("ScaleUp")
 	if loop {
 		s.Still = s.backup
 		s.ScaleUp(rate, maxWith, loop)
@@ -191,6 +227,10 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 		s.backup = s.Still
 	}
 	for {
+		if s.removed {
+			loop = false
+			return
+		}
 		time.Sleep(rate * time.Millisecond)
 		size := s.Still.Rect.Size()
 		if size.X > 5 && size.Y > 5 {
@@ -206,16 +246,120 @@ func (s *Layer) ScaleDown(rate time.Duration, loop bool) {
 	}
 }
 
+func (s *Layer) BurnOut(rate time.Duration) {
+	isOpaque := true
+	for {
+		if s.removed {
+			log.Println("BurnOut stopped")
+			return
+		}
+		time.Sleep(rate * time.Millisecond)
+		if isOpaque {
+			isOpaque = false
+			r := s.Still.Rect
+			for y := r.Min.Y; y < r.Max.Y; y++ {
+				for x := r.Min.X; x < r.Max.X; x++ {
+					p := s.Still.RGBAAt(x, y)
+					if p.A > 5 {
+						isOpaque = true
+						p.A = p.A - 5
+						s.Still.SetRGBA(x, y, p)
+					}
+				}
+			}
+		} else {
+			break
+		}
+	}
+	log.Println("BurnOut ended")
+}
+
+func (s *Layer) FadeOut(rate time.Duration) {
+	isOpaque := true
+	for {
+		if s.removed {
+			log.Println("FadeOut stopped")
+			return
+		}
+		time.Sleep(rate * time.Millisecond)
+		if isOpaque {
+			isOpaque = false
+			r := s.Still.Rect
+			for y := r.Min.Y; y < r.Max.Y; y++ {
+				for x := r.Min.X; x < r.Max.X; x++ {
+					p := s.Still.RGBAAt(x, y)
+					if p.R > 5 {
+						isOpaque = true
+						p.R = p.R - 5
+					}
+					if p.B > 5 {
+						isOpaque = true
+						p.B = p.B - 5
+					}
+					if p.G > 5 {
+						isOpaque = true
+						p.G = p.G - 5
+					}
+					if p.A > 5 {
+						isOpaque = true
+						p.A = p.A - 5
+					}
+					s.Still.SetRGBA(x, y, p)
+				}
+			}
+		} else {
+			break
+		}
+	}
+	log.Println("FadeOut ended")
+}
+
+func (s *Layer) FadeIn(rate time.Duration) {
+	s.backup = s.Still
+	s.Still = blank(s.backup.Rect.Max.X, s.backup.Rect.Max.Y)
+	isOpaque := true
+	for {
+		if s.removed {
+			log.Println("FadeIn stopped")
+			return
+		}
+		time.Sleep(rate * time.Millisecond)
+		if isOpaque {
+			isOpaque = false
+			r := s.Still.Rect
+			for y := r.Min.Y; y < r.Max.Y; y++ {
+				for x := r.Min.X; x < r.Max.X; x++ {
+					p := s.Still.RGBAAt(x, y)
+					pb := s.backup.RGBAAt(x, y)
+					if p.R < pb.R {
+						isOpaque = true
+						p.R++
+					}
+					if p.B < pb.B {
+						isOpaque = true
+						p.B++
+					}
+					if p.G < pb.G {
+						isOpaque = true
+						p.G++
+					}
+					if p.A < pb.A {
+						isOpaque = true
+						p.A++
+					}
+					s.Still.SetRGBA(x, y, p)
+				}
+			}
+		} else {
+			break
+		}
+	}
+	log.Println("FadeIn ended")
+}
+
 func mirror(n int) int {
 	if n > 127 {
 		return n - 127
 	}
 	return n
-}
-
-func fade(n, m int) int {
-	if n > m {
-		return n - m
-	}
-	return 0
 }

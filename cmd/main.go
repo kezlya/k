@@ -9,28 +9,38 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 const displayWidth, displayHeight, quality = 500, 500, 80
 
 var config map[string]string
-var listening []string
+var words *k.Stack
+
+
 
 func main() {
-	listening = append(listening,"")
 	loadConfig()
+
+	words = k.NewStack()
 
 	screen := k.Screen{}
 
-	playGroud(&screen)
+	//go BestEffectSoFar(&screen)
 
-	//go listingAndShow(&screen)
+	go playGroud(&screen)
+
+	//go RecoverDamage(&screen)
 
 	//go analogNumber(&screen)
 
+	//go listingAndShow(&screen)
+
+	//time.Sleep(10000 * time.Millisecond)
+
 	startServer(&screen)
+
 }
 
 func loadConfig() {
@@ -43,8 +53,8 @@ func loadConfig() {
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
-		kv := strings.Split(s.Text(),"=")
-		if len(kv) == 2{
+		kv := strings.Split(s.Text(), "=")
+		if len(kv) == 2 {
 			config[kv[0]] = kv[1]
 		}
 	}
@@ -57,11 +67,11 @@ func startServer(screen *k.Screen) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		sp := r.URL.Query().Get("speech")
-		if sp !="" && sp != listening[len(listening)-1]{
-			listening = append(listening,strings.TrimSpace(sp))
-		}
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
+		sp := r.URL.Query().Get("word")
+		if sp != "" && sp != "undefined" {
+			words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp)," ","+",100)})
+		}
 	})
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -70,34 +80,61 @@ func startServer(screen *k.Screen) {
 }
 
 func playGroud(screen *k.Screen) {
-
-	//layer3 := k.LayerFrom(k.RandomPixels(500,500))
+	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	layer3 := k.LayerFrom(k.FlickerImage("flower", -1))
-	go layer3.ScaleUp(33, 700, true)
-	screen.Add(layer3)
-	screen.GridTo(k.FOUR)
+	for i := 0; i < 15; i++ {
+		layer3 := k.LayerFrom(k.FlickerImage("sky",-1))
+		go layer3.RandomEffect()
+		go layer3.RandomEffect()
+		go layer3.RandomEffect()
 
+		screen.Add(layer3)
+		time.Sleep(3000 * time.Millisecond)
+
+	}
+	screen.RemoveAll()
+	return
 }
 
-func listingAndShow(screen *k.Screen){
-	var last string
-	wc := len(listening)
-	time.Sleep(5000 * time.Millisecond)
-	log.Println("start")
+func BestEffectSoFar(screen *k.Screen) {
+	screen.GridTo(k.FOUR)
+	for i := 0; i < 10; i++ {
+		layer3 := k.LayerFrom(k.GoogleImage("flowers",-1))
+		go layer3.BurnOut(7)
+		go layer3.ScaleUp(30,800,false)
+		screen.Add(layer3)
+		time.Sleep(3000 * time.Millisecond)
+
+	}
+	screen.RemoveAll()
+	return
+}
+
+func RecoverDamage(screen *k.Screen) {
+	layer3 := k.LayerFrom(k.OnlineImage("http://lsusmath.rickmabry.org/rmabry/knots/newfauxtrefoil2-500x500.jpg"))
+	screen.Add(layer3)
+	layer1 := k.LayerFrom(k.RandomAlpha(displayWidth,displayHeight))
+	screen.Add(layer1)
+	go layer1.FadeOut(200)
+	return
+}
+
+func listingAndShow(screen *k.Screen) {
 
 	//screen.GridTo(k.EIGHT)
 	for {
-		if wc != len(listening) {
-			wc = len(listening)
-			last = strings.Replace(listening[len(listening)-1]," ","+",-1)
-			l := k.LayerFrom(k.GoogleImage(last, -1))
+		time.Sleep(2000 * time.Millisecond)
+		if w := words.Pop(); w != nil {
+			l := k.LayerFrom(k.GoogleImage(w.Value, -1))
+			go l.RandomEffect()
+			go l.RandomEffect()
+			go l.RandomEffect()
 			screen.Add(l)
-			go l.ScaleUp(30, 800, false)
-			log.Println(len(listening),last)
 		}
-		log.Println(wc)
+
 	}
+
+	screen.RemoveAll()
 }
 
 func analogNumber(screen *k.Screen) {

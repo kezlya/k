@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const displayWidth, displayHeight, quality = 500, 500, 80
+const displayWidth, displayHeight, quality = 200, 200, 80
 
 var config map[string]string
 var words *k.Stack
@@ -82,15 +82,27 @@ func startServer(screen *k.Screen) {
 func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-	for i := 0; i < 15; i++ {
-		layer3 := k.LayerFrom(k.FlickerImage("sky",-1))
-		go layer3.RandomEffect()
-		go layer3.RandomEffect()
-		go layer3.RandomEffect()
 
-		screen.Add(layer3)
-		time.Sleep(3000 * time.Millisecond)
+	for {
+		words.Push(&k.Node{"lips"})
+		words.Push(&k.Node{"sunshine"})
+		words.Push(&k.Node{"eyes"})
+		words.Push(&k.Node{"mountains"})
+		words.Push(&k.Node{"eye"})
+		words.Push(&k.Node{"space"})
+		words.Push(&k.Node{"macro"})
+		words.Push(&k.Node{"sky"})
+		words.Push(&k.Node{"coffee"})
+		if w := words.Pop(); w != nil {
+			for i := 0; i < 3; i++ {
+				layer3 := k.LayerFrom(k.FlickerImage(w.Value, -1))
+				go layer3.FadeIn(20)
+				go layer3.RandomEffect()
 
+				screen.Add(layer3)
+				time.Sleep(2000 * time.Millisecond)
+			}
+		}
 	}
 	screen.RemoveAll()
 	return

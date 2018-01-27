@@ -63,6 +63,7 @@ func RandomAlpha(width, height int) *image.RGBA {
 }
 
 func FlickerImage(keyword string, order int) *image.RGBA {
+	log.Println("Loading from Flicker: ", keyword)
 	type flickerImage struct {
 		Media struct {
 			Url string `json:"m"`
@@ -184,17 +185,16 @@ func (s *Layer) RandomEffect() {
 	n := rand.Intn(4)
 	switch n {
 	case 0:
-		s.BurnOut(time.Duration(rand.Intn(500)))
+		s.BurnOut(time.Duration(rand.Intn(400)))
 	case 1:
-		s.ScaleUp(time.Duration(rand.Intn(500)), rand.Intn(700), true)
+		s.ScaleUp(time.Duration(rand.Intn(200)), rand.Intn(1000), false)
 	case 2:
-		s.ScaleDown(time.Duration(rand.Intn(500)), true)
+		s.ScaleDown(time.Duration(rand.Intn(200)), false)
 	case 3:
-		s.FadeOut(time.Duration(rand.Intn(500)))
+		s.FadeOut(time.Duration(rand.Intn(300)))
 	case 4:
-		s.FadeIn(time.Duration(rand.Intn(500)))
+		s.FadeIn(time.Duration(rand.Intn(200)))
 	}
-
 }
 
 func (s *Layer) ScaleUp(rate time.Duration, maxWith int, loop bool) {

@@ -29,13 +29,13 @@ func main() {
 
 	//go BestEffectSoFar(&screen)
 
-	//go playGroud(&screen)
+	go playGroud(&screen)
 
 	//go RecoverDamage(&screen)
 
 	//go analogNumber(&screen)
 
-	go listingAndShow(&screen)
+	//go listingAndShow(&screen)
 
 	//time.Sleep(10000 * time.Millisecond)
 
@@ -83,7 +83,7 @@ func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 	for i := 0; i < 15; i++ {
-		layer3 := k.LayerFrom(k.GoogleImage("cats",-1))
+		layer3 := k.LayerFrom(k.FlickerImage("sky",-1))
 		go layer3.RandomEffect()
 		go layer3.RandomEffect()
 		go layer3.RandomEffect()

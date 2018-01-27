@@ -13,6 +13,10 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"bytes"
+	"encoding/json"
+	"strings"
 )
 
 type Layer struct {
@@ -59,9 +63,42 @@ func RandomAlpha(width, height int) *image.RGBA {
 }
 
 func FlickerImage(keyword string, order int) *image.RGBA {
+	type flickerImage struct {
+		Media struct {
+			Url string `json:"m"`
+		} `json:"media"`
+	}
+	type flickerFeed struct {
+		Images []flickerImage `json:"items"`
+	}
+	var fImg flickerFeed
 	var img *image.RGBA
 
-	//https://api.flickr.com/services/feeds/photos_public.gne?tags=hello&format=json
+	if order < 0 || order > 19 {
+		rand.Seed(time.Now().UnixNano())
+		order = rand.Intn(19)
+	}
+
+	resp, err := http.Get("https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=" + keyword)
+	if err != nil {
+		log.Println(err)
+	}
+
+	defer resp.Body.Close()
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	respStr := string(buf.Bytes())
+	respStr = strings.TrimPrefix(respStr, "jsonFlickrFeed(")
+	respStr = strings.TrimSuffix(respStr, ")")
+
+	if err = json.Unmarshal([]byte(respStr), &fImg); err != nil {
+		log.Println(err, "Flicker json error")
+	}
+
+	img = OnlineImage(fImg.Images[order].Media.Url)
+	if img == nil {
+		img = blank(1,1)
+	}
 	return img
 }
 
@@ -90,7 +127,7 @@ func GoogleImage(keyword string, order int) *image.RGBA {
 	})
 
 	if img == nil {
-		img = blank(1,1)
+		img = blank(1, 1)
 	}
 	return img
 }
@@ -100,7 +137,7 @@ func OnlineImage(url string) *image.RGBA {
 
 	img = loadFromUrl(url)
 	if img == nil {
-		img = blank(1,1)
+		img = blank(1, 1)
 	}
 	return img
 }
@@ -149,9 +186,9 @@ func (s *Layer) RandomEffect() {
 	case 0:
 		s.BurnOut(time.Duration(rand.Intn(500)))
 	case 1:
-		s.ScaleUp(time.Duration(rand.Intn(500)),rand.Intn(700),true)
+		s.ScaleUp(time.Duration(rand.Intn(500)), rand.Intn(700), true)
 	case 2:
-		s.ScaleDown(time.Duration(rand.Intn(500)),true)
+		s.ScaleDown(time.Duration(rand.Intn(500)), true)
 	case 3:
 		s.FadeOut(time.Duration(rand.Intn(500)))
 	case 4:
@@ -279,7 +316,7 @@ func (s *Layer) FadeOut(rate time.Duration) {
 
 func (s *Layer) FadeIn(rate time.Duration) {
 	s.backup = s.Still
-	s.Still = blank(s.backup.Rect.Max.X,s.backup.Rect.Max.Y)
+	s.Still = blank(s.backup.Rect.Max.X, s.backup.Rect.Max.Y)
 	isOpaque := true
 	for {
 		if s.removed {
@@ -293,7 +330,7 @@ func (s *Layer) FadeIn(rate time.Duration) {
 			for y := r.Min.Y; y < r.Max.Y; y++ {
 				for x := r.Min.X; x < r.Max.X; x++ {
 					p := s.Still.RGBAAt(x, y)
-					pb := s.backup.RGBAAt(x,y)
+					pb := s.backup.RGBAAt(x, y)
 					if p.R < pb.R {
 						isOpaque = true
 						p.R++
@@ -302,11 +339,11 @@ func (s *Layer) FadeIn(rate time.Duration) {
 						isOpaque = true
 						p.B++
 					}
-					if p.G < pb.G  {
+					if p.G < pb.G {
 						isOpaque = true
 						p.G++
 					}
-					if p.A <pb.A{
+					if p.A < pb.A {
 						isOpaque = true
 						p.A++
 					}

@@ -14,6 +14,8 @@ import (
 	"time"
 	"fmt"
 	"bytes"
+	"strings"
+	"encoding/json"
 )
 
 type Layer struct {
@@ -45,6 +47,16 @@ func RandomPixels(width, height int) *image.RGBA {
 	return img
 }
 
+type flickerImage struct {
+	Media struct{
+		Url string `json:"m"`
+	} `json:"media"`
+}
+
+type flickerFeed struct {
+	Images []flickerImage `json:"items"`
+}
+
 func FlickerImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
 	resp, err := http.Get("https://api.flickr.com/services/feeds/photos_public.gne?format=json&tags=" + keyword )
@@ -56,11 +68,16 @@ func FlickerImage(keyword string, order int) *image.RGBA {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	respStr := string(buf.Bytes())
-	log.Println(respStr)
-//jsonFlickrFeed(
-	//if err := json.Unmarshal(respByte, &countryList); err != nil {
-	//	return nil, err
-	//}
+	respStr = strings.TrimPrefix(respStr, "jsonFlickrFeed(")
+	respStr = strings.TrimSuffix(respStr, ")")
+
+	var fImg flickerFeed
+
+	if err = json.Unmarshal([]byte(respStr), &fImg); err != nil {
+		log.Println(err, "Flicker json error")
+	}
+
+	log.Println("Images", fImg)
 
 	if img == nil {
 		img = blank()

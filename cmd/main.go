@@ -70,10 +70,8 @@ func startServer(screen *k.Screen) {
 		sp := r.URL.Query().Get("word")
 		if sp != "" && sp != "undefined" && sp != lw {
 			lw = sp
-			for _,w := range strings.Split(strings.TrimSpace(sp)," "){
-				words.Push(&k.Node{w})
-				log.Println("Adding word:",w)
-			}
+			words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp), " ", "+", 100),true})
+			log.Println("Adding word:",sp)
 		}
 	})
 	err := http.ListenAndServe(":9090", nil)
@@ -85,38 +83,50 @@ func startServer(screen *k.Screen) {
 func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
-
+	tries := 1
+	var layer3 *k.Layer
 	for {
-
 		if w := words.Pop(); w != nil {
-			//for i := 0; i < 1; i++ {
-				layer3 := k.LayerFrom(k.FlickerImage(w.Value, -1))
+
+			if w.IsVoice{
+				tries = 3
+			} else {
+				tries = 1
+			}
+			for i := 0; i < tries; i++ {
+
+				if w.IsVoice {
+					layer3 = k.LayerFrom(k.GoogleImage(w.Value, -1))
+
+				} else {
+					layer3 = k.LayerFrom(k.FlickerImage(w.Value, -1))
+				}
 				go layer3.FadeIn(20)
 				go layer3.RandomEffect()
 
 				screen.Add(layer3)
 				time.Sleep(2000 * time.Millisecond)
-			//}
+			}
 		} else {
-			words.Push(&k.Node{"sky"})
-			words.Push(&k.Node{"mountains"})
-			words.Push(&k.Node{"eye"})
-			words.Push(&k.Node{"space"})
-			words.Push(&k.Node{"lips"})
-			words.Push(&k.Node{"sunshine"})
-			words.Push(&k.Node{"eyes"})
-			words.Push(&k.Node{"Road"})
-			words.Push(&k.Node{"Love"})
-			words.Push(&k.Node{"Kiss"})
-			words.Push(&k.Node{"Highway"})
-			words.Push(&k.Node{"Hand"})
-			words.Push(&k.Node{"Birds"})
-			words.Push(&k.Node{"Berry"})
-			words.Push(&k.Node{"Touch"})
-			words.Push(&k.Node{"Love"})
-			words.Push(&k.Node{"Feels"})
-			words.Push(&k.Node{"More"})
-			words.Push(&k.Node{"Beautiful"})
+			words.Push(&k.Node{"sky",false})
+			words.Push(&k.Node{"mountains",false})
+			words.Push(&k.Node{"eye",false})
+			words.Push(&k.Node{"space",false})
+			words.Push(&k.Node{"lips",false})
+			words.Push(&k.Node{"sunshine",false})
+			words.Push(&k.Node{"eyes",false})
+			words.Push(&k.Node{"Road",false})
+			words.Push(&k.Node{"Love",false})
+			words.Push(&k.Node{"Kiss",false})
+			words.Push(&k.Node{"Highway",false})
+			words.Push(&k.Node{"Hand",false})
+			words.Push(&k.Node{"Birds",false})
+			words.Push(&k.Node{"Berry",false})
+			words.Push(&k.Node{"Touch",false})
+			words.Push(&k.Node{"Love",false})
+			words.Push(&k.Node{"Feels",false})
+			words.Push(&k.Node{"More",false})
+			words.Push(&k.Node{"Beautiful",false})
 		}
 	}
 	screen.RemoveAll()
@@ -130,7 +140,7 @@ func BestEffectSoFar(screen *k.Screen) {
 		go layer3.BurnOut(7)
 		go layer3.ScaleUp(30, 800, false)
 		screen.Add(layer3)
-		time.Sleep(3000 * time.Millisecond)
+		time.Sleep(2000 * time.Millisecond)
 
 	}
 	screen.RemoveAll()

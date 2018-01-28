@@ -2,6 +2,7 @@ package k
 
 type Node struct {
 	Value string
+	IsVoice bool
 }
 
 // NewStack returns a new stack.

@@ -106,7 +106,7 @@ func FlickerImage(keyword string, order int) *image.RGBA {
 func GoogleImage(keyword string, order int) *image.RGBA {
 	var img *image.RGBA
 
-	if order < 1 {
+	if order < 0 {
 		rand.Seed(time.Now().UnixNano())
 		order = rand.Intn(20)
 	}

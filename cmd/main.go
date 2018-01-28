@@ -62,13 +62,18 @@ func loadConfig() {
 }
 
 func startServer(screen *k.Screen) {
+	lw := "undefined"
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 		sp := r.URL.Query().Get("word")
-		if sp != "" && sp != "undefined" {
-			words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp), " ", "+", 100)})
+		if sp != "" && sp != "undefined" && sp != lw {
+			lw = sp
+			for _,w := range strings.Split(strings.TrimSpace(sp)," "){
+				words.Push(&k.Node{w})
+				log.Println("Adding word:",w)
+			}
 		}
 	})
 	err := http.ListenAndServe(":9090", nil)
@@ -84,23 +89,34 @@ func playGroud(screen *k.Screen) {
 	for {
 
 		if w := words.Pop(); w != nil {
-			for i := 0; i < 2; i++ {
+			//for i := 0; i < 1; i++ {
 				layer3 := k.LayerFrom(k.FlickerImage(w.Value, -1))
 				go layer3.FadeIn(20)
 				go layer3.RandomEffect()
 
 				screen.Add(layer3)
-				time.Sleep(3000 * time.Millisecond)
-			}
+				time.Sleep(2000 * time.Millisecond)
+			//}
 		} else {
 			words.Push(&k.Node{"sky"})
-			words.Push(&k.Node{"macro"})
 			words.Push(&k.Node{"mountains"})
 			words.Push(&k.Node{"eye"})
 			words.Push(&k.Node{"space"})
 			words.Push(&k.Node{"lips"})
 			words.Push(&k.Node{"sunshine"})
 			words.Push(&k.Node{"eyes"})
+			words.Push(&k.Node{"Road"})
+			words.Push(&k.Node{"Love"})
+			words.Push(&k.Node{"Kiss"})
+			words.Push(&k.Node{"Highway"})
+			words.Push(&k.Node{"Hand"})
+			words.Push(&k.Node{"Birds"})
+			words.Push(&k.Node{"Berry"})
+			words.Push(&k.Node{"Touch"})
+			words.Push(&k.Node{"Love"})
+			words.Push(&k.Node{"Feels"})
+			words.Push(&k.Node{"More"})
+			words.Push(&k.Node{"Beautiful"})
 		}
 	}
 	screen.RemoveAll()

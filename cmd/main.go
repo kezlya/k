@@ -19,7 +19,7 @@ var config map[string]string
 var words *k.Stack
 
 func main() {
-	loadConfig()
+	//loadConfig()
 
 	words = k.NewStack()
 

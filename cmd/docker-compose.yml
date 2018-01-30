@@ -2,7 +2,10 @@ version: "3"
 
 services:
   app:
-    image: golang:1.9-alpine
-    volumes:
-          - ~/go/src/:/go/src/
-    working_dir: /go/src/github.com/kezlya/k/cmd
+    build:
+      context: .
+      dockerfile: GoDockerServer
+    image: k
+    restart: always
+    ports:
+      - "9090:9090"

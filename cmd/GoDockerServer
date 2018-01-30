@@ -1,0 +1,7 @@
+FROM golang:1.8-alpine
+RUN apk add --no-cache git mercurial \
+    && go get github.com/kezlya/k \
+    && go install github.com/kezlya/k/cmd \
+    && apk del git mercurial
+ENTRYPOINT /go/bin/cmd
+EXPOSE 9090

@@ -3,5 +3,6 @@ RUN apk add --no-cache git mercurial \
     && go get github.com/kezlya/k \
     && go install github.com/kezlya/k/cmd \
     && apk del git mercurial
+WORKDIR /go/src/github.com/kezlya/k/cmd
 ENTRYPOINT /go/bin/cmd
 EXPOSE 9090

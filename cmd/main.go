@@ -64,7 +64,7 @@ func loadConfig() {
 func startServer(screen *k.Screen) {
 	lw := "undefined"
 	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("~/go/src/github.com/kezlya/k/cmd/static/", fs))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
 		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
 		sp := r.URL.Query().Get("word")

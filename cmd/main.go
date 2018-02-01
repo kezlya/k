@@ -11,12 +11,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"image"
 )
 
 const displayWidth, displayHeight, quality = 200, 100, 80
 
 var config map[string]string
 var words *k.Stack
+var display *image.RGBA
+var lastResponse int64
 
 func main() {
 	//loadConfig()
@@ -66,7 +69,11 @@ func startServer(screen *k.Screen) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		jpeg.Encode(w, screen.Display(displayWidth, displayHeight), &jpeg.Options{quality})
+		if lastResponse < time.Now().Add(-70* time.Millisecond).UnixNano(){
+			display = screen.Display(displayWidth, displayHeight)
+			lastResponse = time.Now().UnixNano()
+		}
+		jpeg.Encode(w, display, &jpeg.Options{quality})
 		sp := r.URL.Query().Get("word")
 		if sp != "" && sp != "undefined" && sp != lw {
 			lw = sp

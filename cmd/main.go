@@ -31,6 +31,7 @@ func main() {
 	//go BestEffectSoFar(&screen)
 
 	go playGroud(&screen)
+	go randomScreen(&screen)
 
 	//go RecoverDamage(&screen)
 
@@ -87,6 +88,14 @@ func startServer(screen *k.Screen) {
 	}
 }
 
+func randomScreen(screen *k.Screen){
+	rand.Seed(time.Now().UnixNano())
+	for{
+		screen.GridTo(k.DisplayGrid(rand.Intn(8)))
+		time.Sleep(7 * time.Second)
+	}
+}
+
 func playGroud(screen *k.Screen) {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
@@ -94,7 +103,6 @@ func playGroud(screen *k.Screen) {
 	var layer3 *k.Layer
 	for {
 		if w := words.Pop(); w != nil {
-
 			if w.IsVoice{
 				tries = 3
 			} else {

@@ -66,7 +66,7 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 	o := image.Point{0, 0}
 	b := image.Rect(0, 0, width, height)
 	d := image.NewRGBA(b)
-	draw.Draw(d, b, &image.Uniform{color.White}, o, draw.Src)
+	draw.Draw(d, b, &image.Uniform{color.Black}, o, draw.Src)
 
 	for _, l := range s.layers {
 		if l != nil {

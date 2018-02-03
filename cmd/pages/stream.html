@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Kaleidoscope</title>
+    <title>Kaleidoscope Stream</title>
 
     <style>
         body, html {
@@ -30,8 +30,8 @@
     </style>
 </head>
 <body>
-<img id="bg_image" src="../stream.jpg" />
-<button id="start_button" onclick="startButton(event)"><img id="start_img" src="mic.gif" /></button>
+<img id="bg_image" src="stream.jpg" />
+<button id="start_button" onclick="startButton(event)"><img id="start_img" src="/static/mic.gif" /></button>
 <script>
     var final_transcript = '';
     var recognizing = false;
@@ -41,9 +41,9 @@
 
     var words_stack = ["gagarin"];
     var bg_image = document.getElementById('bg_image');
-    var bg_url = "../stream.jpg";
+    var bg_url = "stream.jpg";
     setInterval(function() {
-        bg_url = "../stream.jpg?rand=" + Math.random()+"&word="+words_stack.pop()
+        bg_url = "stream.jpg?rand=" + Math.random()+"&word="+words_stack.pop()
         bg_image.src = bg_url;
     }, 100);
 
@@ -58,17 +58,17 @@
         recognition.onstart = function() {
             recognizing = true;
             showInfo('info_speak_now');
-            start_img.src = 'mic-on.gif';
+            start_img.src = '/static/mic-on.gif';
         };
 
         recognition.onerror = function(event) {
             if (event.error == 'no-speech') {
-                start_img.src = 'mic.gif';
+                start_img.src = '/static/mic.gif';
                 showInfo('info_no_speech');
                 ignore_onend = true;
             }
             if (event.error == 'audio-capture') {
-                start_img.src = 'mic.gif';
+                start_img.src = '/static/mic.gif';
                 showInfo('info_no_microphone');
                 ignore_onend = true;
             }
@@ -87,7 +87,7 @@
             if (ignore_onend) {
                 return;
             }
-            start_img.src = 'mic.gif';
+            start_img.src = '/static/mic.gif';
             if (!final_transcript) {
                 showInfo('info_start');
                 return;
@@ -122,7 +122,7 @@
         final_transcript = '';
         recognition.start();
         ignore_onend = false;
-        start_img.src = 'mic-off.gif';
+        start_img.src = '/static/mic-off.gif';
         showInfo('info_allow');
         start_timestamp = event.timeStamp;
     }

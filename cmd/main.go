@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"github.com/kezlya/k"
+	"image"
 	"image/jpeg"
 	"log"
 	"math/rand"
@@ -11,27 +12,29 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"image"
 )
 
 const displayWidth, displayHeight, quality = 200, 100, 80
 
 var config map[string]string
 var words *k.Stack
-var display *image.RGBA
-var lastResponse int64
+var displayStream *image.RGBA
+var displayNumber *image.RGBA
+var lastResponseStream int64
+var lastResponseNumber int64
+var screen *k.Screen
 
 func main() {
 	//loadConfig()
 
 	words = k.NewStack()
 
-	screen := k.Screen{}
+	screen = &k.Screen{}
 
 	//go BestEffectSoFar(&screen)
 
-	go playGroud(&screen)
-	go randomScreen(&screen)
+	go playGroud()
+	go screen.RandomGrid(7)
 
 	//go RecoverDamage(&screen)
 
@@ -41,7 +44,7 @@ func main() {
 
 	//time.Sleep(10000 * time.Millisecond)
 
-	startServer(&screen)
+	startServer()
 
 }
 
@@ -65,45 +68,61 @@ func loadConfig() {
 	}
 }
 
-func startServer(screen *k.Screen) {
-	lw := "undefined"
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/stream.jpg", func(w http.ResponseWriter, r *http.Request) {
-		if lastResponse < time.Now().Add(-70* time.Millisecond).UnixNano(){
-			display = screen.Display(displayWidth, displayHeight)
-			lastResponse = time.Now().UnixNano()
-		}
-		jpeg.Encode(w, display, &jpeg.Options{quality})
-		sp := r.URL.Query().Get("word")
-		if sp != "" && sp != "undefined" && sp != lw {
-			lw = sp
-			words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp), " ", "+", 100),true})
-			log.Println("Adding word:",sp)
-		}
-	})
+func startServer() {
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	http.HandleFunc("/stream.jpg", imageStream)
+	http.HandleFunc("/number.jpg", imageNumber)
+
+	http.HandleFunc("/stream", page("pages/stream.html"))
+	http.HandleFunc("/number", page("pages/number.html"))
+
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
 
-func randomScreen(screen *k.Screen){
-	rand.Seed(time.Now().UnixNano())
-	for{
-		screen.GridTo(k.DisplayGrid(rand.Intn(8)))
-		time.Sleep(7 * time.Second)
+func page(n string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, n)
 	}
 }
 
-func playGroud(screen *k.Screen) {
+func imageStream(w http.ResponseWriter, r *http.Request) {
+	lw := "undefined"
+	if lastResponseStream < time.Now().Add(-70*time.Millisecond).UnixNano() {
+		displayStream = screen.Display(displayWidth, displayHeight)
+		lastResponseStream = time.Now().UnixNano()
+	}
+	jpeg.Encode(w, displayStream, &jpeg.Options{quality})
+	sp := r.URL.Query().Get("word")
+	if sp != "" && sp != "undefined" && sp != lw {
+		lw = sp
+		words.Push(&k.Node{strings.Replace(strings.TrimSpace(sp), " ", "+", 100), true})
+		log.Println("Adding word:", sp)
+	}
+}
+
+func imageNumber(w http.ResponseWriter, r *http.Request) {
+	if lastResponseNumber < time.Now().Add(-70*time.Millisecond).UnixNano() {
+		rand.Seed(time.Now().UnixNano())
+		n := rand.Intn(100)
+		o := rand.Intn(20)
+		displayNumber = k.GoogleImage("Number+"+strconv.Itoa(n),o)
+		lastResponseNumber = time.Now().UnixNano()
+	}
+	jpeg.Encode(w, displayNumber, &jpeg.Options{quality})
+}
+
+func playGroud() {
 	//screen.GridTo(k.FOUR)
 	//layer3 := k.LayerFrom(k.OnlineImage("http://thedailyrecord.com/files/2011/11/orioles-bird.png"))
 	tries := 1
 	var layer3 *k.Layer
 	for {
 		if w := words.Pop(); w != nil {
-			if w.IsVoice{
+			if w.IsVoice {
 				tries = 3
 			} else {
 				tries = 1
@@ -123,32 +142,32 @@ func playGroud(screen *k.Screen) {
 				time.Sleep(2000 * time.Millisecond)
 			}
 		} else {
-			words.Push(&k.Node{"sky",false})
-			words.Push(&k.Node{"mountains",false})
-			words.Push(&k.Node{"eye",false})
-			words.Push(&k.Node{"space",false})
-			words.Push(&k.Node{"lips",false})
-			words.Push(&k.Node{"sunshine",false})
-			words.Push(&k.Node{"eyes",false})
-			words.Push(&k.Node{"Road",false})
-			words.Push(&k.Node{"Love",false})
-			words.Push(&k.Node{"Kiss",false})
-			words.Push(&k.Node{"Highway",false})
-			words.Push(&k.Node{"Hand",false})
-			words.Push(&k.Node{"Birds",false})
-			words.Push(&k.Node{"Berry",false})
-			words.Push(&k.Node{"Touch",false})
-			words.Push(&k.Node{"Love",false})
-			words.Push(&k.Node{"Feels",false})
-			words.Push(&k.Node{"More",false})
-			words.Push(&k.Node{"Beautiful",false})
+			words.Push(&k.Node{"sky", false})
+			words.Push(&k.Node{"mountains", false})
+			words.Push(&k.Node{"eye", false})
+			words.Push(&k.Node{"space", false})
+			words.Push(&k.Node{"lips", false})
+			words.Push(&k.Node{"sunshine", false})
+			words.Push(&k.Node{"eyes", false})
+			words.Push(&k.Node{"Road", false})
+			words.Push(&k.Node{"Love", false})
+			words.Push(&k.Node{"Kiss", false})
+			words.Push(&k.Node{"Highway", false})
+			words.Push(&k.Node{"Hand", false})
+			words.Push(&k.Node{"Birds", false})
+			words.Push(&k.Node{"Berry", false})
+			words.Push(&k.Node{"Touch", false})
+			words.Push(&k.Node{"Love", false})
+			words.Push(&k.Node{"Feels", false})
+			words.Push(&k.Node{"More", false})
+			words.Push(&k.Node{"Beautiful", false})
 		}
 	}
 	screen.RemoveAll()
 	return
 }
 
-func BestEffectSoFar(screen *k.Screen) {
+func BestEffectSoFar() {
 	screen.GridTo(k.FOUR)
 	for i := 0; i < 10; i++ {
 		layer3 := k.LayerFrom(k.GoogleImage("flowers", -1))

@@ -67,10 +67,9 @@ func loadConfig() {
 }
 
 func startServer() {
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.Handle("/", http.StripPrefix("/pages/", fs))
-	http.HandleFunc("/stream.jpg", stream)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/stream", page("pages/index.html"))
+	http.HandleFunc("/stream.jpg", imageStream)
 
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -78,7 +77,13 @@ func startServer() {
 	}
 }
 
-func stream(w http.ResponseWriter, r *http.Request) {
+func page(n string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, n)
+	}
+}
+
+func imageStream(w http.ResponseWriter, r *http.Request) {
 	lw := "undefined"
 	if lastResponse < time.Now().Add(-70*time.Millisecond).UnixNano() {
 		display = screen.Display(displayWidth, displayHeight)

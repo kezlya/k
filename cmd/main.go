@@ -18,8 +18,10 @@ const displayWidth, displayHeight, quality = 200, 100, 80
 
 var config map[string]string
 var words *k.Stack
-var display *image.RGBA
-var lastResponse int64
+var displayStream *image.RGBA
+var displayNumber *image.RGBA
+var lastResponseStream int64
+var lastResponseNumber int64
 var screen *k.Screen
 
 func main() {
@@ -70,7 +72,7 @@ func startServer() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.HandleFunc("/stream.jpg", imageStream)
-	http.HandleFunc("/number.jpg", imageStream)
+	http.HandleFunc("/number.jpg", imageNumber)
 
 	http.HandleFunc("/stream", page("pages/stream.html"))
 	http.HandleFunc("/number", page("pages/number.html"))
@@ -89,11 +91,11 @@ func page(n string) func(w http.ResponseWriter, r *http.Request) {
 
 func imageStream(w http.ResponseWriter, r *http.Request) {
 	lw := "undefined"
-	if lastResponse < time.Now().Add(-70*time.Millisecond).UnixNano() {
-		display = screen.Display(displayWidth, displayHeight)
-		lastResponse = time.Now().UnixNano()
+	if lastResponseStream < time.Now().Add(-70*time.Millisecond).UnixNano() {
+		displayStream = screen.Display(displayWidth, displayHeight)
+		lastResponseStream = time.Now().UnixNano()
 	}
-	jpeg.Encode(w, display, &jpeg.Options{quality})
+	jpeg.Encode(w, displayStream, &jpeg.Options{quality})
 	sp := r.URL.Query().Get("word")
 	if sp != "" && sp != "undefined" && sp != lw {
 		lw = sp
@@ -102,6 +104,16 @@ func imageStream(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func imageNumber(w http.ResponseWriter, r *http.Request) {
+	if lastResponseNumber < time.Now().Add(-70*time.Millisecond).UnixNano() {
+		rand.Seed(time.Now().UnixNano())
+		n := rand.Intn(100)
+		o := rand.Intn(20)
+		displayNumber = k.GoogleImage("Number+"+strconv.Itoa(n),o)
+		lastResponseNumber = time.Now().UnixNano()
+	}
+	jpeg.Encode(w, displayNumber, &jpeg.Options{quality})
+}
 
 func playGroud() {
 	//screen.GridTo(k.FOUR)

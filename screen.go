@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"image/draw"
 	"log"
+	"time"
+	"math/rand"
 )
 
 type DisplayGrid int
@@ -97,6 +99,14 @@ func (s *Screen) Display(width, height int) *image.RGBA {
 
 func (s *Screen) GridTo(size DisplayGrid) {
 	s.grid = size
+}
+
+func (s *Screen) RandomGrid(seconds time.Duration) {
+	rand.Seed(time.Now().UnixNano())
+	for {
+		s.grid = DisplayGrid(rand.Intn(8))
+		time.Sleep(seconds * time.Second)
+	}
 }
 
 func blank(width, height int) *image.RGBA {

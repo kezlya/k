@@ -32,7 +32,7 @@ func main() {
 	//go BestEffectSoFar(&screen)
 
 	go playGroud()
-	go randomScreen()
+	go screen.RandomGrid(7)
 
 	//go RecoverDamage(&screen)
 
@@ -68,8 +68,12 @@ func loadConfig() {
 
 func startServer() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	http.HandleFunc("/stream", page("pages/index.html"))
+
 	http.HandleFunc("/stream.jpg", imageStream)
+	http.HandleFunc("/number.jpg", imageStream)
+
+	http.HandleFunc("/stream", page("pages/stream.html"))
+	http.HandleFunc("/number", page("pages/number.html"))
 
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {
@@ -98,13 +102,6 @@ func imageStream(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func randomScreen() {
-	rand.Seed(time.Now().UnixNano())
-	for {
-		screen.GridTo(k.DisplayGrid(rand.Intn(8)))
-		time.Sleep(7 * time.Second)
-	}
-}
 
 func playGroud() {
 	//screen.GridTo(k.FOUR)

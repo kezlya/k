@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/k
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Building
+          command: |
+            cd cmd
+            docker build -t $IMAGE_NAME .

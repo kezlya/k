@@ -10,3 +10,9 @@ jobs:
           command: |
             cd cmd
             docker build -t $IMAGE_NAME .
+      - run:
+          name: Deploying
+          command: |
+            docker save -o $CONTAINER_NAME.tar $IMAGE_NAME
+            scp $CONTAINER_NAME.tar $DROPLET_USER@$DROPLET_IP:/$DROPLET_USER
+            scp .circleci/roll-out.sh $DROPLET_USER@$DROPLET_IP:/$DROPLET_USER

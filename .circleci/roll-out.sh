@@ -4,4 +4,4 @@ docker stop $2
 docker rm $2
 docker rmi $2
 docker load -i $2.tar
-docker run -p 9090:8080 --name $2 $1
+docker run -p 9090:80 --name $2 $1

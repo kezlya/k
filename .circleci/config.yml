@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/k
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Building
+          command: |
+            cd cmd
+            docker build -t $IMAGE_NAME .
+      - run:
+          name: Deploying
+          command: |
+            docker save -o $CONTAINER_NAME.tar $IMAGE_NAME
+            scp $CONTAINER_NAME.tar $DROPLET_USER@$DROPLET_IP:/$DROPLET_USER
+            scp .circleci/roll-out.sh $DROPLET_USER@$DROPLET_IP:/$DROPLET_USER
+      - run:
+          name: Rolling out
+          command: ssh -v $DROPLET_USER@$DROPLET_IP "chmod 755 roll-out.sh && ./roll-out.sh $IMAGE_NAME $CONTAINER_NAME"
